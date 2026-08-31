@@ -180,7 +180,7 @@
                 "aria-label": "Facebook"
               }, /* @__PURE__ */ React.createElement(FacebookIcon, { size: 20 })),
               /* @__PURE__ */ React.createElement("a", {
-                href: "https://twitter.com",
+                href: "https://x.com/Pawpad_Blore",
                 target: "_blank",
                 rel: "noopener noreferrer",
                 className: "social-circle-btn",

@@ -165,7 +165,7 @@ function ContactPage({ onBook }) {
                 <FacebookIcon size={20} />
               </a>
               <a
-                href="https://twitter.com"
+                href="https://x.com/Pawpad_Blore"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="social-circle-btn"

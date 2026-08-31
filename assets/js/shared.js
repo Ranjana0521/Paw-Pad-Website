@@ -247,7 +247,7 @@ function Footer({ onBook }) {
             /* @__PURE__ */ React.createElement("div", { className: "socials" },
               /* @__PURE__ */ React.createElement("a", { href: "https://www.instagram.com/pawpad_grooming_studio?igsi=MTRranltYzh1cnVuZw%3D%3D&utm_source=qr", "aria-label": "Instagram", target: "_blank", rel: "noopener noreferrer" }, /* @__PURE__ */ React.createElement(InstagramIcon, { size: 16 })),
               /* @__PURE__ */ React.createElement("a", { href: "https://www.facebook.com/share/19KxDx35E5/?mibextid=wwXIfr", "aria-label": "Facebook", target: "_blank", rel: "noopener noreferrer" }, /* @__PURE__ */ React.createElement(FacebookIcon, { size: 16 })),
-              /* @__PURE__ */ React.createElement("a", { href: "#", "aria-label": "Twitter" }, /* @__PURE__ */ React.createElement(TwitterIcon, { size: 16 }))
+              /* @__PURE__ */ React.createElement("a", { href: "https://x.com/Pawpad_Blore", "aria-label": "Twitter", target: "_blank", rel: "noopener noreferrer" }, /* @__PURE__ */ React.createElement(TwitterIcon, { size: 16 }))
             )
           ),
           /* @__PURE__ */ React.createElement("div", null,

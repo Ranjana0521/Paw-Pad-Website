@@ -325,7 +325,7 @@ function Footer({ onBook }) {
               <div className="socials">
                 <a href="#" aria-label="Instagram"><InstagramIcon size={16} /></a>
                 <a href="#" aria-label="Facebook"><FacebookIcon size={16} /></a>
-                <a href="#" aria-label="Twitter"><TwitterIcon size={16} /></a>
+                <a href="https://x.com/Pawpad_Blore" aria-label="Twitter" target="_blank" rel="noopener noreferrer"><TwitterIcon size={16} /></a>
               </div>
             </div>
             <div>
