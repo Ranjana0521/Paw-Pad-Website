@@ -8,38 +8,80 @@ function BoardingPage({ onBook, onAddToCart }) {
     setOpenFaq(openFaq === idx ? null : idx);
   };
 
-  const handleAddTrialDay = () => {
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("boarding") : (window.PawpadContentStore ? window.PawpadContentStore.get("boarding") : {});
+
+  const handleAddPackage = (pkg) => {
+    const isTrial = pkg.key === "trial-day" || String(pkg.title).toLowerCase().includes("trial");
     const item = {
-      id: "boarding-trial-day",
-      title: "Trial Day Boarding",
+      id: pkg.key === "trial-day" ? "boarding-trial-day" : (pkg.key === "overnight" ? "boarding-overnight" : ("boarding-" + pkg.key)),
+      title: pkg.title,
       category: "Boarding",
-      price: 850,
-      priceDisplay: "₹850",
-      desc: "Mandatory assessment trial day for small dogs before overnight stays",
+      price: pkg.priceNum || (parseFloat(String(pkg.price || "").replace(/[^0-9.]/g, "")) || 1000),
+      priceDisplay: pkg.price ? `${pkg.price}${pkg.priceUnit ? ` / ${pkg.priceUnit.replace(/per /g, "")}` : ""}` : "₹1,000",
+      desc: pkg.desc || (isTrial ? "Mandatory assessment trial day for small dogs before overnight stays" : "Calm, supervised overnight stay for small dogs"),
       requiresPetInfo: true,
       isDogOnly: true,
-      img: "assets/img/pawpad/boarding-sleeping-puppy-toy.webp"
+      requiresTrialDayCheck: !isTrial,
+      img: pkg.img || "assets/img/pawpad/boarding-sleeping-puppy-toy.webp"
     };
     if (typeof onAddToCart === "function") onAddToCart(item);
     else if (window.addToCart) window.addToCart(item);
   };
 
-  const handleAddOvernight = () => {
-    const item = {
-      id: "boarding-overnight",
+  const DEFAULT_BOARDING_PACKAGES = [
+    {
+      key: "trial-day",
+      tag: "Step 1 · Mandatory Assessment",
+      title: "Trial Day",
+      price: "₹850",
+      priceNum: 850,
+      priceUnit: "per dog",
+      img: "assets/img/pawpad/boarding-sleeping-puppy-toy.webp",
+      desc: "A full day with us, so both you and we can see if it's a good fit before committing to an overnight stay. Currently open to small dogs only.",
+      includes: [
+        "Scheduled Feeding: Feeding on your dog's regular schedule — our standard meals are home-cooked, with chicken, pumpkin, carrot, beans, sweet potato, and rice",
+        "Dedicated Quiet Space: Rest and quiet time in the same space used for overnight boarding",
+        "Direct Observation: Direct observation from our team throughout the day",
+        "Parent Consultation: A conversation with you at pickup on how the day went, and whether we're moving forward together"
+      ],
+      note: "Trial days don't include walks — activity happens on-site, supervised, within the boarding space itself. If your dog has any food allergies, let us know in advance. If your dog is on vet-specified food, you'll need to provide it for the day. Paid separately from any future boarding stay."
+    },
+    {
+      key: "overnight",
+      tag: "Step 2 · Overnight Stay",
       title: "Overnight Boarding",
-      category: "Boarding",
-      price: 1000,
-      priceDisplay: "₹1,000 / night",
-      desc: "Calm, supervised overnight stay for small dogs (trial day mandatory)",
-      requiresPetInfo: true,
-      isDogOnly: true,
-      requiresTrialDayCheck: true,
-      img: "assets/img/pawpad/boarding-dog-sleep-mask.webp"
-    };
-    if (typeof onAddToCart === "function") onAddToCart(item);
-    else if (window.addToCart) window.addToCart(item);
-  };
+      price: "₹1,000",
+      priceNum: 1000,
+      priceUnit: "per dog, per night",
+      img: "assets/img/pawpad/boarding-dog-sleep-mask.webp",
+      desc: "A calm, supervised overnight stay in the same space and with the same small cohort your dog got to know during their trial day. Currently open to small dogs only.",
+      includes: [
+        "24/7 Human Supervision: Overnight human supervision, always — never left alone",
+        "Scheduled Feeding: Feeding on your dog's regular schedule — home-cooked meals of chicken, pumpkin, carrot, beans, sweet potato, and rice",
+        "Stress-Reducing Space: Rest and quiet time in a space designed to reduce stress, with never more than four dogs boarding at once",
+        "Supervised Cohort Time: Ongoing supervised time with the other dogs in the cohort"
+      ],
+      note: "A completed trial day is required before booking an overnight stay — it's how we make sure your dog is a good fit before an overnight commitment. Walks aren't included; activity stays on-site and supervised, same as the trial day. If your dog has any food allergies, let us know in advance. If your dog is on vet-specified food, you'll need to provide it. No minimum or maximum stay length."
+    }
+  ];
+
+  const DEFAULT_PILLARS = [
+    {
+      icon: "🍲",
+      title: "Fresh, Wholesome Home Cooking",
+      desc: "Feeding on your dog's regular schedule with home-cooked meals of chicken, pumpkin, carrot, beans, sweet potato, and rice. Special diets or vet food strictly followed."
+    },
+    {
+      icon: "🛡️",
+      title: "Safe, Stress-Free On-Site Activity",
+      desc: "Walks aren't included; all activity happens on-site and supervised within the boarding space to keep your dog secure, relaxed, and safe."
+    },
+    {
+      icon: "🌙",
+      title: "Overnight Human Supervision, Always",
+      desc: "Overnight human supervision, always — dogs are never left alone, ensuring constant comfort, care, and peace of mind."
+    }
+  ];
 
   const FAQ_ITEMS = [
     {
@@ -60,126 +102,70 @@ function BoardingPage({ onBook, onAddToCart }) {
     }
   ];
 
+  const packagesList = (cms.packages && Array.isArray(cms.packages)) ? cms.packages : DEFAULT_BOARDING_PACKAGES;
+  const pillarsList = (cms.pillars && Array.isArray(cms.pillars)) ? cms.pillars : DEFAULT_PILLARS;
+  const faqList = (cms.faq && Array.isArray(cms.faq)) ? cms.faq : FAQ_ITEMS;
+
+  const handleAddTrialDay = () => {
+    const trialPkg = packagesList.find(p => p.key === "trial-day" || String(p.title || "").toLowerCase().includes("trial")) || packagesList[0];
+    if (trialPkg) handleAddPackage(trialPkg);
+  };
+
   return /* @__PURE__ */ React.createElement("div", { className: "page-enter boarding-page-root" },
     /* Main Service Cards */
     /* @__PURE__ */ React.createElement("section", { id: "boarding-options", className: "boarding-cards-section" },
       /* @__PURE__ */ React.createElement("div", { className: "container" },
         /* @__PURE__ */ React.createElement("div", { className: "section-head reveal in" },
-          /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "PAWPAD · BOARDING"),
+          /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.eyebrow || "PAWPAD · BOARDING"),
           /* @__PURE__ */ React.createElement("h2", { className: "h-1" },
-            "Boarding, ",
+            cms.title || "Boarding, ",
             /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "Reimagined")
           ),
           /* @__PURE__ */ React.createElement("p", { className: "section-sub" },
-            "Trial Day & Overnight Stay — What's Included"
+            cms.sub || "Trial Day & Overnight Stay — What's Included"
           )
         ),
 
         /* @__PURE__ */ React.createElement("div", { className: "boarding-grid" },
-          /* Card 1: Trial Day */
-          /* @__PURE__ */ React.createElement("article", { className: "boarding-card reveal" },
-            /* @__PURE__ */ React.createElement("div", { className: "boarding-card-image-box" },
-              /* @__PURE__ */ React.createElement("img", {
-                src: "assets/img/pawpad/boarding-sleeping-puppy-toy.webp",
-                alt: "Puppy sleeping comfortably under a soft blanket cuddling a plush toy",
-                className: "boarding-card-img",
-                loading: "lazy"
-              }),
-              /* @__PURE__ */ React.createElement("span", { className: "boarding-card-tag step-tag" }, "Step 1 · Mandatory Assessment")
-            ),
-            /* @__PURE__ */ React.createElement("div", { className: "boarding-card-body" },
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-header" },
-                /* @__PURE__ */ React.createElement("h3", { className: "boarding-card-title" }, "Trial Day"),
-                /* @__PURE__ */ React.createElement("div", { className: "boarding-card-price" }, "₹850 ", /* @__PURE__ */ React.createElement("span", { className: "price-unit" }, "per dog"))
+          packagesList.map((pkg, idx) =>
+            /* @__PURE__ */ React.createElement("article", { key: pkg.key || idx, className: "boarding-card reveal" },
+              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-image-box" },
+                /* @__PURE__ */ React.createElement("img", {
+                  src: pkg.img || "assets/img/pawpad/boarding-sleeping-puppy-toy.webp",
+                  alt: pkg.title || "Boarding dog resting comfortably",
+                  className: "boarding-card-img",
+                  loading: "lazy"
+                }),
+                pkg.tag && /* @__PURE__ */ React.createElement("span", { className: `boarding-card-tag ${idx === 0 ? "step-tag" : "overnight-tag"}` }, pkg.tag)
               ),
-              /* @__PURE__ */ React.createElement("p", { className: "boarding-card-desc" },
-                "A full day with us, so both you and we can see if it's a good fit before committing to an overnight stay. Currently open to small dogs only."
-              ),
-              /* @__PURE__ */ React.createElement("ul", { className: "boarding-features-list" },
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Scheduled Feeding:"), " Feeding on your dog's regular schedule — our standard meals are home-cooked, with chicken, pumpkin, carrot, beans, sweet potato, and rice")
+              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-body" },
+                /* @__PURE__ */ React.createElement("div", { className: "boarding-card-header" },
+                  /* @__PURE__ */ React.createElement("h3", { className: "boarding-card-title" }, pkg.title),
+                  /* @__PURE__ */ React.createElement("div", { className: "boarding-card-price" },
+                    pkg.price || "₹850", " ",
+                    pkg.priceUnit && /* @__PURE__ */ React.createElement("span", { className: "price-unit" }, pkg.priceUnit)
+                  )
                 ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Dedicated Quiet Space:"), " Rest and quiet time in the same space used for overnight boarding")
+                pkg.desc && /* @__PURE__ */ React.createElement("p", { className: "boarding-card-desc" }, pkg.desc),
+                pkg.includes && Array.isArray(pkg.includes) && pkg.includes.length > 0 && /* @__PURE__ */ React.createElement("ul", { className: "boarding-features-list" },
+                  pkg.includes.map((inc, iidx) =>
+                    /* @__PURE__ */ React.createElement("li", { key: iidx },
+                      React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
+                      /* @__PURE__ */ React.createElement("span", null, inc)
+                    )
+                  )
                 ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Direct Observation:"), " Direct observation from our team throughout the day")
-                ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Parent Consultation:"), " A conversation with you at pickup on how the day went, and whether we're moving forward together")
-                )
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-note" },
-                "Trial days don't include walks — activity happens on-site, supervised, within the boarding space itself. If your dog has any food allergies, let us know in advance. If your dog is on vet-specified food, you'll need to provide it for the day. Paid separately from any future boarding stay."
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-action" },
-                /* @__PURE__ */ React.createElement("button", {
-                  className: "btn btn-primary boarding-btn",
-                  onClick: handleAddTrialDay,
-                  "aria-label": "Add Trial Day Boarding to Cart"
-                },
-                  React.createElement(CartIcon, { size: 16 }),
-                  " Add Trial Day to Cart (₹850) ",
-                  React.createElement(Arrow, null)
-                )
-              )
-            )
-          ),
-
-          /* Card 2: Overnight Boarding */
-          /* @__PURE__ */ React.createElement("article", { className: "boarding-card reveal" },
-            /* @__PURE__ */ React.createElement("div", { className: "boarding-card-image-box" },
-              /* @__PURE__ */ React.createElement("img", {
-                src: "assets/img/pawpad/boarding-dog-sleep-mask.webp",
-                alt: "Calm dog resting peacefully with a sleep mask under duvet",
-                className: "boarding-card-img",
-                loading: "lazy"
-              }),
-              /* @__PURE__ */ React.createElement("span", { className: "boarding-card-tag overnight-tag" }, "Step 2 · Overnight Stay")
-            ),
-            /* @__PURE__ */ React.createElement("div", { className: "boarding-card-body" },
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-header" },
-                /* @__PURE__ */ React.createElement("h3", { className: "boarding-card-title" }, "Overnight Boarding"),
-                /* @__PURE__ */ React.createElement("div", { className: "boarding-card-price" }, "₹1,000 ", /* @__PURE__ */ React.createElement("span", { className: "price-unit" }, "per dog, per night"))
-              ),
-              /* @__PURE__ */ React.createElement("p", { className: "boarding-card-desc" },
-                "A calm, supervised overnight stay in the same space and with the same small cohort your dog got to know during their trial day. Currently open to small dogs only."
-              ),
-              /* @__PURE__ */ React.createElement("ul", { className: "boarding-features-list" },
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "24/7 Human Supervision:"), " Overnight human supervision, always — never left alone")
-                ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Scheduled Feeding:"), " Feeding on your dog's regular schedule — home-cooked meals of chicken, pumpkin, carrot, beans, sweet potato, and rice")
-                ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Stress-Reducing Space:"), " Rest and quiet time in a space designed to reduce stress, with never more than four dogs boarding at once")
-                ),
-                /* @__PURE__ */ React.createElement("li", null,
-                  React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }),
-                  /* @__PURE__ */ React.createElement("span", null, /* @__PURE__ */ React.createElement("strong", null, "Supervised Cohort Time:"), " Ongoing supervised time with the other dogs in the cohort")
-                )
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-note" },
-                /* @__PURE__ */ React.createElement("strong", null, "A completed trial day is required before booking an overnight stay"),
-                " — it's how we make sure your dog is a good fit before an overnight commitment. Walks aren't included; activity stays on-site and supervised, same as the trial day. If your dog has any food allergies, let us know in advance. If your dog is on vet-specified food, you'll need to provide it. No minimum or maximum stay length."
-              ),
-              /* @__PURE__ */ React.createElement("div", { className: "boarding-card-action" },
-                /* @__PURE__ */ React.createElement("button", {
-                  className: "btn btn-primary boarding-btn",
-                  onClick: handleAddOvernight,
-                  "aria-label": "Add Overnight Boarding to Cart"
-                },
-                  React.createElement(CartIcon, { size: 16 }),
-                  " Add Overnight Boarding (₹1,000) ",
-                  React.createElement(Arrow, null)
+                pkg.note && /* @__PURE__ */ React.createElement("div", { className: "boarding-card-note" }, pkg.note),
+                /* @__PURE__ */ React.createElement("div", { className: "boarding-card-action" },
+                  /* @__PURE__ */ React.createElement("button", {
+                    className: "btn btn-primary boarding-btn",
+                    onClick: () => handleAddPackage(pkg),
+                    "aria-label": `Add ${pkg.title} to Cart`
+                  },
+                    React.createElement(CartIcon, { size: 16 }),
+                    ` Add ${pkg.title} (${pkg.price || "₹850"}) `,
+                    React.createElement(Arrow, null)
+                  )
                 )
               )
             )
@@ -196,46 +182,31 @@ function BoardingPage({ onBook, onAddToCart }) {
           /* @__PURE__ */ React.createElement("div", { className: "standards-visual reveal" },
             /* @__PURE__ */ React.createElement("div", { className: "standards-img-box" },
               /* @__PURE__ */ React.createElement("img", {
-                src: "assets/img/pawpad/boarding-dachshund-sleep-mask.webp",
+                src: cms.standardsImg || "assets/img/pawpad/boarding-dachshund-sleep-mask.webp",
                 alt: "Happy dog looking through a heart shaped by hands",
                 className: "standards-img",
                 loading: "lazy"
               })
             ),
             /* @__PURE__ */ React.createElement("div", { className: "standards-quote-card" },
-              /* @__PURE__ */ React.createElement("p", { className: "standards-overlay-quote" }, "“We treat every boarding dog like family — with cozy bedding, home-cooked food, and 24-hour presence.”"),
-              /* @__PURE__ */ React.createElement("span", { className: "standards-overlay-author" }, "— The Pawpad Team")
+              /* @__PURE__ */ React.createElement("p", { className: "standards-overlay-quote" }, cms.standardsQuote || "“We treat every boarding dog like family — with cozy bedding, home-cooked food, and 24-hour presence.”"),
+              /* @__PURE__ */ React.createElement("span", { className: "standards-overlay-author" }, cms.standardsAuthor || "— The Pawpad Team")
             )
           ),
 
           /* Right: Care Pillars */
           /* @__PURE__ */ React.createElement("div", { className: "standards-content reveal" },
-            /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Care Standards"),
-            /* @__PURE__ */ React.createElement("h2", { className: "h-2", style: { margin: "14px 0 24px" } }, "What Daily Life Looks Like at Pawpad"),
+            /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.standardsEyebrow || "Care Standards"),
+            /* @__PURE__ */ React.createElement("h2", { className: "h-2", style: { margin: "14px 0 24px" } }, cms.standardsTitle || "What Daily Life Looks Like at Pawpad"),
             
             /* @__PURE__ */ React.createElement("div", { className: "pillar-list" },
-              /* Pillar 1 */
-              /* @__PURE__ */ React.createElement("div", { className: "pillar-item" },
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-icon" }, "🍲"),
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-text" },
-                  /* @__PURE__ */ React.createElement("h4", null, "Fresh, Wholesome Home Cooking"),
-                  /* @__PURE__ */ React.createElement("p", null, "Feeding on your dog's regular schedule with home-cooked meals of chicken, pumpkin, carrot, beans, sweet potato, and rice. Special diets or vet food strictly followed.")
-                )
-              ),
-              /* Pillar 2 */
-              /* @__PURE__ */ React.createElement("div", { className: "pillar-item" },
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-icon" }, "🛡️"),
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-text" },
-                  /* @__PURE__ */ React.createElement("h4", null, "Safe, Stress-Free On-Site Activity"),
-                  /* @__PURE__ */ React.createElement("p", null, "Walks aren't included; all activity happens on-site and supervised within the boarding space to keep your dog secure, relaxed, and safe.")
-                )
-              ),
-              /* Pillar 3 */
-              /* @__PURE__ */ React.createElement("div", { className: "pillar-item" },
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-icon" }, "🌙"),
-                /* @__PURE__ */ React.createElement("div", { className: "pillar-text" },
-                  /* @__PURE__ */ React.createElement("h4", null, "Overnight Human Supervision, Always"),
-                  /* @__PURE__ */ React.createElement("p", null, "Overnight human supervision, always — dogs are never left alone, ensuring constant comfort, care, and peace of mind.")
+              pillarsList.map((pillar, pidx) =>
+                /* @__PURE__ */ React.createElement("div", { key: pidx, className: "pillar-item" },
+                  /* @__PURE__ */ React.createElement("div", { className: "pillar-icon" }, pillar.icon || "🐾"),
+                  /* @__PURE__ */ React.createElement("div", { className: "pillar-text" },
+                    /* @__PURE__ */ React.createElement("h4", null, pillar.title),
+                    /* @__PURE__ */ React.createElement("p", null, pillar.desc)
+                  )
                 )
               )
             )
@@ -248,13 +219,13 @@ function BoardingPage({ onBook, onAddToCart }) {
     /* @__PURE__ */ React.createElement("section", { className: "boarding-faq-section" },
       /* @__PURE__ */ React.createElement("div", { className: "container boarding-faq-container" },
         /* @__PURE__ */ React.createElement("div", { className: "section-head reveal", style: { textAlign: "center", maxWidth: "680px", margin: "0 auto 48px" } },
-          /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Got Questions?"),
-          /* @__PURE__ */ React.createElement("h2", { className: "h-1" }, "Frequently Asked Questions"),
-          /* @__PURE__ */ React.createElement("p", { className: "section-sub" }, "Everything you need to know about our boarding guidelines, routines, and policies.")
+          /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.faqEyebrow || "Got Questions?"),
+          /* @__PURE__ */ React.createElement("h2", { className: "h-1" }, cms.faqTitle || "Frequently Asked Questions"),
+          /* @__PURE__ */ React.createElement("p", { className: "section-sub" }, cms.faqSub || "Everything you need to know about our boarding guidelines, routines, and policies.")
         ),
 
         /* @__PURE__ */ React.createElement("div", { className: "faq-list" },
-          FAQ_ITEMS.map((item, idx) =>
+          faqList.map((item, idx) =>
             /* @__PURE__ */ React.createElement("div", {
               key: idx,
               className: `faq-item reveal ${openFaq === idx ? "active" : ""}`
@@ -280,10 +251,10 @@ function BoardingPage({ onBook, onAddToCart }) {
     /* @__PURE__ */ React.createElement("section", { className: "boarding-cta-section" },
       /* @__PURE__ */ React.createElement("div", { className: "container" },
         /* @__PURE__ */ React.createElement("div", { className: "boarding-cta-box reveal" },
-          /* @__PURE__ */ React.createElement("p", { className: "eyebrow", style: { color: "var(--white)" } }, "Ready to Plan Your Dog's Stay?"),
-          /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { color: "var(--white)", margin: "16px 0 20px" } }, "Give Your Pup a Calm, Loving Stay"),
+          /* @__PURE__ */ React.createElement("p", { className: "eyebrow", style: { color: "var(--white)" } }, cms.ctaEyebrow || "Ready to Plan Your Dog's Stay?"),
+          /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { color: "var(--white)", margin: "16px 0 20px" } }, cms.ctaTitle || "Give Your Pup a Calm, Loving Stay"),
           /* @__PURE__ */ React.createElement("p", { className: "lead", style: { color: "rgba(255,255,255,0.88)", maxWidth: "56ch", margin: "0 auto 32px" } },
-            "Add a Trial Day to your cart to begin the onboarding process, or chat directly with Leena and the Pawpad team on WhatsApp."
+            cms.ctaDesc || "Add a Trial Day to your cart to begin the onboarding process, or chat directly with Leena and the Pawpad team on WhatsApp."
           ),
           /* @__PURE__ */ React.createElement("div", { className: "boarding-cta-actions" },
             /* @__PURE__ */ React.createElement("button", {
@@ -292,16 +263,16 @@ function BoardingPage({ onBook, onAddToCart }) {
               style: { background: "var(--champagne)", color: "var(--ink)" }
             },
               React.createElement(CartIcon, { size: 16 }),
-              " Book Trial Day (₹850) ",
+              ` ${cms.ctaButtonText || "Book Trial Day (₹850)"} `,
               React.createElement(Arrow, null)
             ),
             /* @__PURE__ */ React.createElement("a", {
-              href: "https://wa.me/919663077496?text=Hi%20Pawpad%2C%20I%20would%20like%20to%20enquire%20about%20boarding%20for%20my%20dog",
+              href: `https://wa.me/${(cms.whatsappNumber || "919663077496").replace(/[^0-9]/g, "")}?text=Hi%20Pawpad%2C%20I%20would%20like%20to%20enquire%20about%20boarding%20for%20my%20dog`,
               target: "_blank",
               rel: "noopener noreferrer",
               className: "btn btn-ghost",
               style: { borderColor: "rgba(255,255,255,0.6)", color: "var(--white)" }
-            }, "Chat on WhatsApp")
+            }, cms.ctaWhatsAppText || "Chat on WhatsApp")
           )
         )
       )
@@ -803,32 +774,34 @@ function BoardingPage({ onBook, onAddToCart }) {
 
 function MyotherapyPage({ onBook }) {
   useReveal();
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("myotherapy") : (window.PawpadContentStore ? window.PawpadContentStore.get("myotherapy") : {});
+
   return /* @__PURE__ */ React.createElement("div", { className: "page-enter" },
     /* @__PURE__ */ React.createElement("section", { className: "editorial-page" },
       /* @__PURE__ */ React.createElement("div", { className: "container editorial-container" },
-        /* @__PURE__ */ React.createElement("p", { className: "editorial-eyebrow reveal in" }, "PAWPAD \xB7 MYOTHERAPY"),
-        /* @__PURE__ */ React.createElement("h1", { className: "editorial-title reveal in" }, "Myotherapy \u2013 Coming Soon"),
+        /* @__PURE__ */ React.createElement("p", { className: "editorial-eyebrow reveal in" }, cms.eyebrow || "PAWPAD · MYOTHERAPY"),
+        /* @__PURE__ */ React.createElement("h1", { className: "editorial-title reveal in" }, cms.title || "Myotherapy – Coming Soon"),
         /* @__PURE__ */ React.createElement("hr", { className: "editorial-divider reveal in" }),
         /* @__PURE__ */ React.createElement("div", { className: "editorial-content reveal in" },
           /* @__PURE__ */ React.createElement("p", { className: "editorial-lead" },
-            "Ever noticed a subtle change in how your dog moves \u2014 a slight shift in gait, a new hesitation before jumping onto the couch or into the car, needing a boost for stairs they used to take without a second thought? A calm, quiet dog isn't always a relaxed one, either. Sometimes it's a dog who's learned to move less, because moving hurts \u2014 and it's easy to miss, especially in a dog you already think of as \"chilled\" or \"lazy.\""
+            cms.lead || "Ever noticed a subtle change in how your dog moves — a slight shift in gait, a new hesitation before jumping onto the couch or into the car, needing a boost for stairs they used to take without a second thought? A calm, quiet dog isn't always a relaxed one, either. Sometimes it's a dog who's learned to move less, because moving hurts — and it's easy to miss, especially in a dog you already think of as \"chilled\" or \"lazy.\""
           ),
           /* @__PURE__ */ React.createElement("p", { className: "editorial-text" },
-            "Myotherapy is gentle, hands-on bodywork for dogs \u2014 targeted massage and movement techniques that work with the whole body, not just wherever seems sore, to ease tension and support mobility. It's genuinely for every dog: keeping a dog feeling at their best, helping a puppy build good movement habits, supporting a senior through the slower years. But dogs with musculoskeletal issues \u2014 stiffness, old injuries, post-op recovery, arthritis, or a gait that just doesn't look quite right \u2014 are the ones who see the most benefit, often within just a few sessions."
+            cms.body1 || "Myotherapy is gentle, hands-on bodywork for dogs — targeted massage and movement techniques that work with the whole body, not just wherever seems sore, to ease tension and support mobility. It's genuinely for every dog: keeping a dog feeling at their best, helping a puppy build good movement habits, supporting a senior through the slower years. But dogs with musculoskeletal issues — stiffness, old injuries, post-op recovery, arthritis, or a gait that just doesn't look quite right — are the ones who see the most benefit, often within just a few sessions."
           ),
           /* @__PURE__ */ React.createElement("p", { className: "editorial-text" },
-            "Curious about the methodology? ",
+            cms.body2Prefix !== undefined ? cms.body2Prefix : "Curious about the methodology? ",
             /* @__PURE__ */ React.createElement("a", {
-              href: "https://www.galenmyotherapy.com",
+              href: cms.linkUrl || "https://www.galenmyotherapy.com",
               target: "_blank",
               rel: "noopener noreferrer",
               className: "editorial-link"
-            }, "Visit Galen Myotherapy"),
-            ". Join the waitlist to be the first to know when sessions open."
+            }, cms.linkText || "Visit Galen Myotherapy"),
+            cms.body2Suffix !== undefined ? cms.body2Suffix : ". Join the waitlist to be the first to know when sessions open."
           ),
           /* @__PURE__ */ React.createElement("hr", { className: "editorial-divider-sub" }),
           /* @__PURE__ */ React.createElement("p", { className: "editorial-note" },
-            "Pawpad \xB7 Details current as of this document's creation date."
+            cms.note || "Pawpad · Details current as of this document's creation date."
           )
         )
       )

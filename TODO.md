@@ -52,10 +52,9 @@ Tracking against the 4-week plan agreed with Pawpad. Updated 12 Aug 2026.
 
 ## Weeks 2–4
 
-- [ ] Full CSS/responsive fix pass beyond what was touched incidentally this
-      week
+- [x] Full CSS/responsive fix pass & brand typography consistency
 - [x] Favicon/icon set generation & manifest integration
-- [x] WhatsApp floating click-to-chat widget across all pages (integrated in `assets/js/shared.js` & `page-shell.js`)
+- [x] WhatsApp floating click-to-chat widget across all pages (integrated in `assets/js/shared.js` & `page-shell.js` with WebP asset optimization)
 - [ ] Web3Forms integration replacing `assets/js/hubspot.js`
 - [x] Cart/checkout page and drawer with Razorpay links & full validation (`assets/js/cart.js`)
 - [ ] Security hardening: Cloudflare in front of GitHub Pages (headers/WAF/HTTPS)

@@ -1,3 +1,34 @@
+# Dependencies
 node_modules/
+package-lock.json
+
+# Build & Dist Outputs
 dist/
+
+# OS Metadata & Cache
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE & Editor Configs
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs & Temporary Files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Environment & Local Secrets
+.env
+.env.local
+.env.*.local
+*.backup.json

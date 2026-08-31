@@ -86,16 +86,16 @@ const COURSE_LIST = [
 ];
 
 function CoursesHero() {
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("courses") : (window.PawpadContentStore ? window.PawpadContentStore.get("courses") : {});
   return React.createElement("section", { className: "c-hero" },
     React.createElement("div", { className: "container c-hero-grid" },
       React.createElement("div", null,
-        React.createElement("p", { className: "eyebrow reveal in" }, "Pawpad courses"),
+        React.createElement("p", { className: "eyebrow reveal in" }, cms.eyebrow || "Pawpad courses"),
         React.createElement("h1", { className: "h-display reveal in c-course-title", style: { marginTop: 24, maxWidth: "18ch" } },
-          "Become a Professional ",
-          React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", whiteSpace: "nowrap" } }, "Pet Groomer")
+          cms.title ? cms.title : React.createElement(React.Fragment, null, "Become a Professional ", React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", whiteSpace: "nowrap" } }, "Pet Groomer"))
         ),
         React.createElement("p", { className: "lead reveal in", style: { marginTop: 28, maxWidth: "58ch" } },
-          "A hands-on grooming course designed for animal lovers looking to build the skills, confidence, and practical experience needed to start a career in pet grooming."
+          cms.lead || "A hands-on grooming course designed for animal lovers looking to build the skills, confidence, and practical experience needed to start a career in pet grooming."
         ),
         React.createElement("p", { className: "reveal in", style: { marginTop: 18, maxWidth: "62ch" } },
           "Learn dog grooming, cat grooming, handling techniques, coat care, hygiene, safety, and business fundamentals through personalised training with experienced professionals."
@@ -103,7 +103,7 @@ function CoursesHero() {
       ),
       React.createElement("div", { className: "c-hero-image reveal in" },
         React.createElement("img", {
-          src: "assets/img/pawpad/courses-cover-new.webp",
+          src: cms.heroImage || "assets/img/pawpad/courses-cover-new.webp",
           alt: "Pawpad grooming course",
           fetchpriority: "high",
           decoding: "async"
@@ -121,6 +121,9 @@ function CoursesHero() {
 }
 
 function CourseCards({ onBook }) {
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("courses") : (window.PawpadContentStore ? window.PawpadContentStore.get("courses") : {});
+  const list = (cms.courseList && Array.isArray(cms.courseList)) ? cms.courseList : COURSE_LIST;
+
   return React.createElement(
     "section",
     { className: "course-cards" },
@@ -130,7 +133,7 @@ function CourseCards({ onBook }) {
       React.createElement(
         "div",
         { className: "cc-head reveal" },
-        React.createElement("p", { className: "eyebrow" }, "COURSE OVERVIEW"),
+        React.createElement("p", { className: "eyebrow" }, cms.eyebrow || "COURSE OVERVIEW"),
         React.createElement(
           "h2",
           { className: "h-1", style: { marginTop: 18, maxWidth: "22ch" } },
@@ -141,10 +144,17 @@ function CourseCards({ onBook }) {
       React.createElement(
         "div",
         { className: "cc-grid" },
-        COURSE_LIST.map((c, i) =>
+        list.map((c, i) =>
           React.createElement(
             "article",
-            { key: c.key, className: "cc-card reveal", style: { transitionDelay: `${i * 50}ms` } },
+            { key: c.key || i, className: "cc-card reveal", style: { transitionDelay: `${i * 50}ms` } },
+            c.img && React.createElement("div", { className: "cc-card-img-wrap", style: { marginBottom: "16px", borderRadius: "14px", overflow: "hidden" } },
+              React.createElement("img", {
+                src: c.img,
+                alt: c.title,
+                style: { width: "100%", height: "160px", objectFit: "cover", display: "block" }
+              })
+            ),
             React.createElement("h3", { className: "cc-card-title" }, c.title),
             React.createElement("div", { className: "cc-card-price" }, c.price),
             React.createElement("p", { className: "cc-card-desc" }, c.desc),

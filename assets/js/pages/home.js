@@ -53,6 +53,8 @@ const SERVICES = [
 function Hero({ onBook }) {
   const ref = useRefH(null);
   const [scrollY, setScrollY] = useStateH(0);
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("home") : (window.PawpadContentStore ? window.PawpadContentStore.get("home") : {});
+
   useEffectH(() => {
     const onScroll = () => setScrollY(window.scrollY);
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -60,6 +62,12 @@ function Hero({ onBook }) {
   }, []);
   const motion = document.body.dataset.motion;
   const par = motion === "still" ? 0 : scrollY;
+  const statsList = cms.stats && Array.isArray(cms.stats) ? cms.stats : [
+    { strong: "8+", label: "years of conscious care" },
+    { strong: "4,200+", label: "tails wagged" },
+    { strong: "0", label: "sedation, ever" }
+  ];
+
   return /* @__PURE__ */ React.createElement("section", { className: "hero", ref },
     /* @__PURE__ */ React.createElement("div", { className: "hero-paws" }, [...Array(7)].map((_, i) => /* @__PURE__ */ React.createElement("div", {
       key: i, className: "paw-fl", style: {
@@ -71,20 +79,20 @@ function Hero({ onBook }) {
     }, /* @__PURE__ */ React.createElement(PawIcon, { size: [24, 36, 28, 42, 22, 30, 26][i], color: "var(--driftwood)" })))),
     /* @__PURE__ */ React.createElement("div", { className: "container hero-grid" },
       /* @__PURE__ */ React.createElement("div", { className: "hero-text" },
-        /* @__PURE__ */ React.createElement("p", { className: "eyebrow-pill reveal in" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 12, color: "currentColor" }), " Conscious pet care \xB7 Bengaluru \xB7 est. 2017"),
+        /* @__PURE__ */ React.createElement("p", { className: "eyebrow-pill reveal in" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 12, color: "currentColor" }), " ", cms.heroEyebrow || "Conscious pet care · Bengaluru · est. 2017"),
         /* @__PURE__ */ React.createElement("h1", { className: "hero-title reveal in", style: { marginTop: 26 } },
-          "Conscious Pet", /* @__PURE__ */ React.createElement("br", null),
-          "Grooming", /* @__PURE__ */ React.createElement("br", null),
-          /* @__PURE__ */ React.createElement("span", { className: "hero-title-accent" }, "& Holistic Petcare"), /* @__PURE__ */ React.createElement("br", null),
-          "in Bangalore"
+          cms.heroTitle1 || "Conscious Pet", /* @__PURE__ */ React.createElement("br", null),
+          cms.heroTitle2 || "Grooming", /* @__PURE__ */ React.createElement("br", null),
+          /* @__PURE__ */ React.createElement("span", { className: "hero-title-accent" }, cms.heroTitleAccent || "& Holistic Petcare"), /* @__PURE__ */ React.createElement("br", null),
+          cms.heroTitleEnd || "in Bangalore"
         ),
-        /* @__PURE__ */ React.createElement("p", { className: "lead reveal in", style: { marginTop: 28 } }, "Calm, stress-free grooming, pet wellness therapy, boarding, and professional grooming courses — all designed with your pet's emotional wellbeing in mind."),
-        /* @__PURE__ */ React.createElement("p", { className: "hero-sub reveal in", style: { marginTop: 18, maxWidth: "52ch" } }, "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.")
+        /* @__PURE__ */ React.createElement("p", { className: "lead reveal in", style: { marginTop: 28 } }, cms.heroLead || "Calm, stress-free grooming, pet wellness therapy, boarding, and professional grooming courses — all designed with your pet's emotional wellbeing in mind."),
+        /* @__PURE__ */ React.createElement("p", { className: "hero-sub reveal in", style: { marginTop: 18, maxWidth: "52ch" } }, cms.heroSub || "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.")
       ),
       /* @__PURE__ */ React.createElement("div", { className: "hero-image-wrap" },
         /* @__PURE__ */ React.createElement("div", { className: "hero-image blob-1", style: { transform: `translateY(${par * -0.03}px) scale(1)` } },
           /* @__PURE__ */ React.createElement("img", {
-            src: "assets/img/pawpad/hero-cover-dog-cat.webp",
+            src: cms.heroImage || "assets/img/pawpad/hero-cover-dog-cat.webp",
             alt: "A dachshund dog and cat resting together with lilac flowers in a basket",
             fetchpriority: "high",
             decoding: "async"
@@ -93,9 +101,9 @@ function Hero({ onBook }) {
       )
     ),
     /* @__PURE__ */ React.createElement("div", { className: "container hero-stats reveal in" },
-      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, "8+"), /* @__PURE__ */ React.createElement("span", null, "years of conscious care")),
-      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, "4,200+"), /* @__PURE__ */ React.createElement("span", null, "tails wagged")),
-      /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("strong", null, "0"), /* @__PURE__ */ React.createElement("span", null, "sedation, ever"))
+      statsList.map((st, sidx) =>
+        React.createElement("div", { key: sidx }, React.createElement("strong", null, st.strong), React.createElement("span", null, st.label))
+      )
     ),
     /* @__PURE__ */ React.createElement("style", null, `
         .hero {
@@ -217,7 +225,10 @@ function Hero({ onBook }) {
 }
 function ServiceCards({ navigate, onBook }) {
   const [open, setOpen] = useStateH(null);
-  return /* @__PURE__ */ React.createElement("section", { className: "services-section", id: "services" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "services-head" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "What we do"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "14ch" } }, "Services snapshots")), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { maxWidth: "40ch" } }, "Each service is built on the same foundation \u2014 calm handling, physical comfort, and respect for what your pet is telling us. Tap or hover any card to look closer.")), /* @__PURE__ */ React.createElement("div", { className: "services-grid" }, SERVICES.map((s, idx) => {
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("home") : (window.PawpadContentStore ? window.PawpadContentStore.get("home") : {});
+  const servicesList = (cms.services && Array.isArray(cms.services)) ? cms.services : SERVICES;
+
+  return /* @__PURE__ */ React.createElement("section", { className: "services-section", id: "services" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "services-head" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "What we do"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "14ch" } }, "Services snapshots")), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { maxWidth: "40ch" } }, "Each service is built on the same foundation \u2014 calm handling, physical comfort, and respect for what your pet is telling us. Tap or hover any card to look closer.")), /* @__PURE__ */ React.createElement("div", { className: "services-grid" }, servicesList.map((s, idx) => {
     const isOpen = open === s.key;
     return /* @__PURE__ */ React.createElement(
       "article",
@@ -230,7 +241,7 @@ function ServiceCards({ navigate, onBook }) {
         style: { transitionDelay: `${idx * 70}ms` }
       },
       /* @__PURE__ */ React.createElement("div", { className: "svc-img" }, /* @__PURE__ */ React.createElement("img", { src: s.img, alt: s.title }), /* @__PURE__ */ React.createElement("span", { className: "svc-no" }, s.no)),
-      /* @__PURE__ */ React.createElement("div", { className: "svc-body" }, /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, s.title), /* @__PURE__ */ React.createElement("p", { className: "svc-blurb" }, s.blurb), /* @__PURE__ */ React.createElement("div", { className: "svc-detail" }, /* @__PURE__ */ React.createElement("ul", { className: "svc-points" }, s.points.map((p) => /* @__PURE__ */ React.createElement("li", { key: p }, /* @__PURE__ */ React.createElement(PawIcon, { size: 11, color: "var(--driftwood)" }), " ", p))), /* @__PURE__ */ React.createElement("div", { className: "svc-foot" }, /* @__PURE__ */ React.createElement("span", { className: "svc-price" }, s.price), /* @__PURE__ */ React.createElement("div", { className: "svc-actions" }, s.key === "myotherapy" ? /* @__PURE__ */ React.createElement("span", { className: "svc-link disabled" }, s.cta) : /* @__PURE__ */ React.createElement("a", { href: hrefFor(s.target), className: "svc-link" }, s.cta, " ", /* @__PURE__ */ React.createElement(Arrow, { size: 12 }))))))
+      /* @__PURE__ */ React.createElement("div", { className: "svc-body" }, /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, s.title), /* @__PURE__ */ React.createElement("p", { className: "svc-blurb" }, s.blurb), /* @__PURE__ */ React.createElement("div", { className: "svc-detail" }, /* @__PURE__ */ React.createElement("ul", { className: "svc-points" }, (Array.isArray(s.points) ? s.points : []).map((p) => /* @__PURE__ */ React.createElement("li", { key: p }, /* @__PURE__ */ React.createElement(PawIcon, { size: 11, color: "var(--driftwood)" }), " ", p))), /* @__PURE__ */ React.createElement("div", { className: "svc-foot" }, /* @__PURE__ */ React.createElement("span", { className: "svc-price" }, s.price), /* @__PURE__ */ React.createElement("div", { className: "svc-actions" }, s.key === "myotherapy" ? /* @__PURE__ */ React.createElement("span", { className: "svc-link disabled" }, s.cta) : /* @__PURE__ */ React.createElement("a", { href: hrefFor(s.target), className: "svc-link" }, s.cta, " ", /* @__PURE__ */ React.createElement(Arrow, { size: 12 }))))))
     );
   }))), /* @__PURE__ */ React.createElement("style", null, `
         .services-section { background: var(--cream-bg); padding-top: 0; }
@@ -337,7 +348,26 @@ function ServiceCards({ navigate, onBook }) {
       `));
 }
 function StoryTease() {
-  return /* @__PURE__ */ React.createElement("section", { className: "story-tease" }, /* @__PURE__ */ React.createElement("div", { className: "container story-grid" }, /* @__PURE__ */ React.createElement("div", { className: "story-img-stack reveal" }, /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-1 blob-2" }, /* @__PURE__ */ React.createElement("img", { src: "assets/img/3.webp", alt: "A dog being gently held", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-2 blob-3" }, /* @__PURE__ */ React.createElement("img", { src: "assets/img/8.webp", alt: "A relaxed dog at rest", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-floating-card" }, /* @__PURE__ */ React.createElement("span", { className: "eyebrow" }, "In memory of"), /* @__PURE__ */ React.createElement("h4", { className: "h-3", style: { marginTop: 6 } }, "Dew ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", fontSize: ".75em" } }, "\u2014 Puchki \u2014")), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, marginTop: 6, color: "var(--ink-mute)" } }, "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."))), /* @__PURE__ */ React.createElement("div", { className: "story-text reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Our story"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18 } }, '"I always wanted ', /* @__PURE__ */ React.createElement("br", null), "to work with animals", /* @__PURE__ */ React.createElement("br", null), "I just took the long ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "way"), ' to get here"'), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { marginTop: 28 } }, "Pawpad started in 2017 in a small studio in Kalyan Nagar. Eight years on, it's still the same question we show up with every day: ", /* @__PURE__ */ React.createElement("em", { className: "italic" }, "does this animal feel safe here?")), /* @__PURE__ */ React.createElement("p", { style: { marginTop: 16, maxWidth: "56ch" } }, "From rescue work with Bengaluru's streeties to international certifications in feline grooming and canine skin care \u2014 every choice we make is rooted in patience and respect for what each animal is telling us."), /* @__PURE__ */ React.createElement("a", { href: hrefFor("about"), className: "btn btn-primary", style: { marginTop: 32 } }, "Read the full story ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("style", null, `
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("home") : (window.PawpadContentStore ? window.PawpadContentStore.get("home") : {});
+  const st = cms.storyTease || {
+    eyebrow: "Our story",
+    titleLine1: '"I always wanted ',
+    titleLine2: "to work with animals",
+    titleLine3: "I just took the long ",
+    titleAccent: "way",
+    titleEnd: ' to get here"',
+    lead: "Pawpad started in 2017 in a small studio in Kalyan Nagar. Eight years on, it's still the same question we show up with every day: does this animal feel safe here?",
+    paragraph: "From rescue work with Bengaluru's streeties to international certifications in feline grooming and canine skin care — every choice we make is rooted in patience and respect for what each animal is telling us.",
+    ctaText: "Read the full story",
+    img1: "assets/img/3.webp",
+    img2: "assets/img/8.webp",
+    cardEyebrow: "In memory of",
+    cardTitle: "Dew",
+    cardSubtitle: "— Puchki —",
+    cardText: "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."
+  };
+
+  return /* @__PURE__ */ React.createElement("section", { className: "story-tease" }, /* @__PURE__ */ React.createElement("div", { className: "container story-grid" }, /* @__PURE__ */ React.createElement("div", { className: "story-img-stack reveal" }, /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-1 blob-2" }, /* @__PURE__ */ React.createElement("img", { src: st.img1 || "assets/img/3.webp", alt: "A dog being gently held", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-2 blob-3" }, /* @__PURE__ */ React.createElement("img", { src: st.img2 || "assets/img/8.webp", alt: "A relaxed dog at rest", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-floating-card" }, /* @__PURE__ */ React.createElement("span", { className: "eyebrow" }, st.cardEyebrow || "In memory of"), /* @__PURE__ */ React.createElement("h4", { className: "h-3", style: { marginTop: 6 } }, (st.cardTitle || "Dew") + " ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", fontSize: ".75em" } }, st.cardSubtitle || "— Puchki —")), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, marginTop: 6, color: "var(--ink-mute)" } }, st.cardText || "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."))), /* @__PURE__ */ React.createElement("div", { className: "story-text reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, st.eyebrow || "Our story"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18 } }, (st.titleLine1 || '"I always wanted '), /* @__PURE__ */ React.createElement("br", null), (st.titleLine2 || "to work with animals"), /* @__PURE__ */ React.createElement("br", null), (st.titleLine3 || "I just took the long "), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, st.titleAccent || "way"), (st.titleEnd || ' to get here"')), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { marginTop: 28 } }, st.lead || "Pawpad started in 2017 in a small studio in Kalyan Nagar. Eight years on, it's still the same question we show up with every day: does this animal feel safe here?"), /* @__PURE__ */ React.createElement("p", { style: { marginTop: 16, maxWidth: "56ch" } }, st.paragraph || "From rescue work with Bengaluru's streeties to international certifications in feline grooming and canine skin care — every choice we make is rooted in patience and respect for what each animal is telling us."), /* @__PURE__ */ React.createElement("a", { href: hrefFor("about"), className: "btn btn-primary", style: { marginTop: 32 } }, (st.ctaText || "Read the full story") + " ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("style", null, `
         .story-tease { background: var(--champagne); }
         .story-grid {
           display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
@@ -373,13 +403,17 @@ function StoryTease() {
       `));
 }
 function ValuesStrip() {
-  const items = [
-    { title: "Never rushed", body: "We space appointments so every pet gets the time they need. Volume isn't the metric \u2014 comfort is." },
-    { title: "Listen first", body: "We read body language before we read calendars. A flick of an ear, a sigh, a shift in weight \u2014 it all matters." },
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("home") : (window.PawpadContentStore ? window.PawpadContentStore.get("home") : {});
+  const vals = cms.values || {};
+  const defaultItems = [
+    { title: "Never rushed", body: "We space appointments so every pet gets the time they need. Volume isn't the metric — comfort is." },
+    { title: "Listen first", body: "We read body language before we read calendars. A flick of an ear, a sigh, a shift in weight — it all matters." },
     { title: "No sedation", body: "Ever. Some pets need three visits before we touch a clipper. That's care, not a setback." },
     { title: "Skilled with fearful & rescue dogs", body: "Years of rescue work mean we know how to meet fearful, overwhelmed, or unsocialised animals where they are." }
   ];
-  return /* @__PURE__ */ React.createElement("section", { className: "values-section" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "values-head reveal text-center" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow", style: { justifyContent: "center" } }, "The Pawpad way"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "22ch", marginInline: "auto" } }, "Four quiet commitments that ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "change everything"))), /* @__PURE__ */ React.createElement("div", { className: "values-grid" }, items.map((it, i) => /* @__PURE__ */ React.createElement("div", { key: it.title, className: "value-card reveal", style: { transitionDelay: `${i * 100}ms` } }, /* @__PURE__ */ React.createElement("div", { className: "v-num" }, "0", i + 1), /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, it.title), /* @__PURE__ */ React.createElement("p", null, it.body), /* @__PURE__ */ React.createElement(PawIcon, { size: 20, color: "var(--eagle-deep)", style: { position: "absolute", bottom: 24, right: 24, opacity: 0.45 } }))))), /* @__PURE__ */ React.createElement("style", null, `
+  const items = Array.isArray(vals.items) && vals.items.length > 0 ? vals.items : defaultItems;
+
+  return /* @__PURE__ */ React.createElement("section", { className: "values-section" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "values-head reveal text-center" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow", style: { justifyContent: "center" } }, vals.eyebrow || "The Pawpad way"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "22ch", marginInline: "auto" } }, (vals.title || "Four quiet commitments that "), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, vals.titleAccent || "change everything"))), /* @__PURE__ */ React.createElement("div", { className: "values-grid" }, items.map((it, i) => /* @__PURE__ */ React.createElement("div", { key: it.title || i, className: "value-card reveal", style: { transitionDelay: `${i * 100}ms` } }, /* @__PURE__ */ React.createElement("div", { className: "v-num" }, "0", i + 1), /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, it.title), /* @__PURE__ */ React.createElement("p", null, it.body), /* @__PURE__ */ React.createElement(PawIcon, { size: 20, color: "var(--eagle-deep)", style: { position: "absolute", bottom: 24, right: 24, opacity: 0.45 } }))))), /* @__PURE__ */ React.createElement("style", null, `
         .values-section { background: var(--cream-bg); }
         .values-head { margin-bottom: 64px; }
         .values-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
@@ -413,6 +447,8 @@ function ValuesStrip() {
 }
 function HomePage({ onBook, navigate }) {
   useReveal();
-  return /* @__PURE__ */ React.createElement("div", { className: "page-enter" }, /* @__PURE__ */ React.createElement(Hero, { onBook }), /* @__PURE__ */ React.createElement(ServiceCards, { navigate, onBook }), /* @__PURE__ */ React.createElement(Marquee, { items: ["conscious grooming", "calm handling", "no sedation", "streetie-friendly", "kalyan nagar", "since 2017", "made with care"] }), /* @__PURE__ */ React.createElement(ValuesStrip, null), /* @__PURE__ */ React.createElement(Testimonials, null));
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("home") : (window.PawpadContentStore ? window.PawpadContentStore.get("home") : {});
+  const marqueeList = Array.isArray(cms.marqueeItems) && cms.marqueeItems.length > 0 ? cms.marqueeItems : ["conscious grooming", "calm handling", "no sedation", "streetie-friendly", "kalyan nagar", "since 2017", "made with care"];
+  return /* @__PURE__ */ React.createElement("div", { className: "page-enter" }, /* @__PURE__ */ React.createElement(Hero, { onBook }), /* @__PURE__ */ React.createElement(ServiceCards, { navigate, onBook }), /* @__PURE__ */ React.createElement(Marquee, { items: marqueeList }), /* @__PURE__ */ React.createElement(ValuesStrip, null), /* @__PURE__ */ React.createElement(Testimonials, null));
 }
 Object.assign(window, { HomePage, SERVICES });

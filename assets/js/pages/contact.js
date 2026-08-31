@@ -28,6 +28,18 @@
     if (typeof useReveal === "function") {
       useReveal();
     }
+    const cms = (typeof useCmsContent === "function") ? useCmsContent("contact") : (window.PawpadContentStore ? window.PawpadContentStore.get("contact") : {});
+    const addressLines = Array.isArray(cms.addressLines) && cms.addressLines.length > 0 ? cms.addressLines : [
+      "#426, 5th Main Road,",
+      "HRBR 2nd Block, Kalyan Nagar",
+      "Bangalore - 560043 India"
+    ];
+    const socials = cms.socials || {
+      instagram: "https://www.instagram.com/pawpad_grooming_studio?igsi=MTRranltYzh1cnVuZw%3D%3D&utm_source=qr",
+      facebook: "https://www.facebook.com/share/19KxDx35E5/?mibextid=wwXIfr",
+      twitter: "https://x.com/Pawpad_Blore",
+      pinterest: "https://pinterest.com"
+    };
 
     return /* @__PURE__ */ React.createElement("div", { className: "contact-page-wrapper" },
       
@@ -36,16 +48,16 @@
         /* @__PURE__ */ React.createElement("div", { className: "container" },
           /* @__PURE__ */ React.createElement("div", { className: "contact-banner-grid reveal in" },
             /* @__PURE__ */ React.createElement("div", { className: "contact-banner-left" },
-              /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Contact Pawpad"),
-              /* @__PURE__ */ React.createElement("h1", { className: "h-display contact-main-headline" }, "Come say hello."),
+              /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.bannerEyebrow || "Contact Pawpad"),
+              /* @__PURE__ */ React.createElement("h1", { className: "h-display contact-main-headline" }, cms.bannerTitle || "Come say hello."),
               /* @__PURE__ */ React.createElement("p", { className: "lead contact-banner-lead" },
-                "Have a question about grooming, care, boarding or our services? Reach out to Pawpad. We would love to hear from you."
+                cms.bannerLead || "Have a question about grooming, care, boarding or our services? Reach out to Pawpad. We would love to hear from you."
               )
             ),
             /* @__PURE__ */ React.createElement("div", { className: "contact-studio-badge" },
-              /* @__PURE__ */ React.createElement("span", { className: "studio-label" }, "STUDIO"),
-              /* @__PURE__ */ React.createElement("h3", { className: "studio-name" }, "Kalyan Nagar"),
-              /* @__PURE__ */ React.createElement("span", { className: "studio-city" }, "BENGALURU")
+              /* @__PURE__ */ React.createElement("span", { className: "studio-label" }, cms.studioBadgeLabel || "STUDIO"),
+              /* @__PURE__ */ React.createElement("h3", { className: "studio-name" }, cms.studioBadgeName || "Kalyan Nagar"),
+              /* @__PURE__ */ React.createElement("span", { className: "studio-city" }, cms.studioBadgeCity || "BENGALURU")
             )
           ),
           /* @__PURE__ */ React.createElement("div", { className: "banner-gold-dot-row" },
@@ -60,12 +72,12 @@
           
           /* Left Column: Direct Info & Numbered Details */
           /* @__PURE__ */ React.createElement("div", { className: "contact-info-col reveal" },
-            /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Get in touch"),
+            /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.mainEyebrow || "Get in touch"),
             /* @__PURE__ */ React.createElement("h2", { className: "h-1 contact-title" },
-              "We are here for you."
+              cms.mainTitle || "We are here for you."
             ),
             /* @__PURE__ */ React.createElement("p", { className: "contact-subtext" },
-              "Whether you are booking a grooming session, asking about our services, or simply want to know more about Pawpad, reach out to us."
+              cms.mainSubtext || "Whether you are booking a grooming session, asking about our services, or simply want to know more about Pawpad, reach out to us."
             ),
 
             /* Numbered Detail List */
@@ -78,8 +90,8 @@
                   /* @__PURE__ */ React.createElement("span", { className: "cd-label" }, "EMAIL")
                 ),
                 /* @__PURE__ */ React.createElement("div", { className: "cd-content" },
-                  /* @__PURE__ */ React.createElement("a", { href: "mailto:info@pawpad.in", className: "cd-value-link cd-value-title" },
-                    "info@pawpad.in"
+                  /* @__PURE__ */ React.createElement("a", { href: `mailto:${cms.email || "info@pawpad.in"}`, className: "cd-value-link cd-value-title" },
+                    cms.email || "info@pawpad.in"
                   )
                 )
               ),
@@ -91,8 +103,8 @@
                   /* @__PURE__ */ React.createElement("span", { className: "cd-label" }, "PHONE")
                 ),
                 /* @__PURE__ */ React.createElement("div", { className: "cd-content" },
-                  /* @__PURE__ */ React.createElement("a", { href: "tel:+919663077496", className: "cd-value-link cd-value-title" },
-                    "9663077496"
+                  /* @__PURE__ */ React.createElement("a", { href: `tel:${cms.phone ? (cms.phone.startsWith("+") ? cms.phone : `+91${cms.phone}`) : "+919663077496"}`, className: "cd-value-link cd-value-title" },
+                    cms.phoneDisplay || cms.phone || "9663077496"
                   )
                 )
               ),
@@ -104,9 +116,7 @@
                   /* @__PURE__ */ React.createElement("span", { className: "cd-label" }, "ADDRESS")
                 ),
                 /* @__PURE__ */ React.createElement("div", { className: "cd-content cd-text-block" },
-                  /* @__PURE__ */ React.createElement("p", null, "#426, 5th Main Road,"),
-                  /* @__PURE__ */ React.createElement("p", null, "HRBR 2nd Block, Kalyan Nagar"),
-                  /* @__PURE__ */ React.createElement("p", null, "Bangalore - 560043 India")
+                  addressLines.map((line, lidx) => /* @__PURE__ */ React.createElement("p", { key: lidx }, line))
                 )
               ),
 
@@ -117,9 +127,9 @@
                   /* @__PURE__ */ React.createElement("span", { className: "cd-label" }, "OPENING HOURS")
                 ),
                 /* @__PURE__ */ React.createElement("div", { className: "cd-content cd-text-block" },
-                  /* @__PURE__ */ React.createElement("p", null, "Weekdays: 11 AM - 8 PM"),
-                  /* @__PURE__ */ React.createElement("p", null, "Weekends: 10 AM - 8 PM"),
-                  /* @__PURE__ */ React.createElement("p", { className: "closed-accent" }, "Thursdays: Closed")
+                  /* @__PURE__ */ React.createElement("p", null, cms.hoursWeekdays || "Weekdays: 11 AM - 8 PM"),
+                  /* @__PURE__ */ React.createElement("p", null, cms.hoursWeekends || "Weekends: 10 AM - 8 PM"),
+                  /* @__PURE__ */ React.createElement("p", { className: "closed-accent" }, cms.hoursClosed || "Thursdays: Closed")
                 )
               )
             )
@@ -128,24 +138,24 @@
           /* Right Column: Studio Card */
           /* @__PURE__ */ React.createElement("div", { className: "contact-card-col reveal" },
             /* @__PURE__ */ React.createElement("div", { className: "contact-studio-card" },
-              /* @__PURE__ */ React.createElement("p", { className: "eyebrow card-eyebrow" }, "Pawpad Grooming Studio"),
+              /* @__PURE__ */ React.createElement("p", { className: "eyebrow card-eyebrow" }, cms.cardEyebrow || "Pawpad Grooming Studio"),
               /* @__PURE__ */ React.createElement("h2", { className: "card-title" },
-                "Soft hands",
+                cms.cardTitle || "Soft hands",
                 /* @__PURE__ */ React.createElement("br", null),
-                /* @__PURE__ */ React.createElement("em", { className: "italic card-italic" }, "Calm pets.")
+                /* @__PURE__ */ React.createElement("em", { className: "italic card-italic" }, cms.cardTitleAccent || "Calm pets.")
               ),
               /* @__PURE__ */ React.createElement("p", { className: "card-desc" },
-                "Sessions are spaced and never rushed. We plan around your pet's temperament, comfort and wellbeing."
+                cms.cardDesc || "Sessions are spaced and never rushed. We plan around your pet's temperament, comfort and wellbeing."
               ),
               /* @__PURE__ */ React.createElement("div", { className: "card-actions" },
                 /* @__PURE__ */ React.createElement("button", {
                   className: "btn btn-primary card-btn-book",
                   onClick: () => onBook && onBook("grooming")
-                }, "Book a session ", /* @__PURE__ */ React.createElement(Arrow, { size: 14 })),
+                }, (cms.cardBtnBook || "Book a session") + " ", /* @__PURE__ */ React.createElement(Arrow, { size: 14 })),
                 /* @__PURE__ */ React.createElement("a", {
-                  href: "tel:+919663077496",
+                  href: `tel:${cms.cardCallPhone || "+919663077496"}`,
                   className: "btn btn-secondary card-btn-call"
-                }, "Call us")
+                }, cms.cardBtnCall || "Call us")
               ),
               /* @__PURE__ */ React.createElement("div", { className: "card-accents-corner" },
                 /* @__PURE__ */ React.createElement(SparkleIcon, { size: 18, color: "var(--driftwood)" }),
@@ -161,33 +171,33 @@
         /* @__PURE__ */ React.createElement("div", { className: "container" },
           /* @__PURE__ */ React.createElement("div", { className: "social-row-container reveal" },
             /* @__PURE__ */ React.createElement("div", null,
-              /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Follow Pawpad"),
-              /* @__PURE__ */ React.createElement("h2", { className: "h-1 social-section-title" }, "Stay connected.")
+              /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, cms.socialEyebrow || "Follow Pawpad"),
+              /* @__PURE__ */ React.createElement("h2", { className: "h-1 social-section-title" }, cms.socialTitle || "Stay connected.")
             ),
             /* @__PURE__ */ React.createElement("div", { className: "contact-social-pills" },
-              /* @__PURE__ */ React.createElement("a", {
-                href: "https://www.instagram.com/pawpad_grooming_studio?igsi=MTRranltYzh1cnVuZw%3D%3D&utm_source=qr",
+              socials.instagram && /* @__PURE__ */ React.createElement("a", {
+                href: socials.instagram,
                 target: "_blank",
                 rel: "noopener noreferrer",
                 className: "social-circle-btn",
                 "aria-label": "Instagram"
               }, /* @__PURE__ */ React.createElement(InstagramIcon, { size: 20 })),
-              /* @__PURE__ */ React.createElement("a", {
-                href: "https://www.facebook.com/share/19KxDx35E5/?mibextid=wwXIfr",
+              socials.facebook && /* @__PURE__ */ React.createElement("a", {
+                href: socials.facebook,
                 target: "_blank",
                 rel: "noopener noreferrer",
                 className: "social-circle-btn",
                 "aria-label": "Facebook"
               }, /* @__PURE__ */ React.createElement(FacebookIcon, { size: 20 })),
-              /* @__PURE__ */ React.createElement("a", {
-                href: "https://x.com/Pawpad_Blore",
+              socials.twitter && /* @__PURE__ */ React.createElement("a", {
+                href: socials.twitter,
                 target: "_blank",
                 rel: "noopener noreferrer",
                 className: "social-circle-btn",
                 "aria-label": "Twitter"
               }, /* @__PURE__ */ React.createElement(TwitterIcon, { size: 20 })),
-              /* @__PURE__ */ React.createElement("a", {
-                href: "https://pinterest.com",
+              socials.pinterest && /* @__PURE__ */ React.createElement("a", {
+                href: socials.pinterest,
                 target: "_blank",
                 rel: "noopener noreferrer",
                 className: "social-circle-btn",

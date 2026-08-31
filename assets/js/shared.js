@@ -79,7 +79,7 @@ function TopNav({ route, onBook, onOpenCart }) {
     else if (window.openCart) window.openCart();
   };
 
-  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("header", { className: "nav " + (scrolled ? "scrolled" : "") }, /* @__PURE__ */ React.createElement("div", { className: "container nav-inner" }, /* @__PURE__ */ React.createElement("a", { href: hrefFor("home"), className: "nav-brand", "aria-label": "Pawpad home" }, /* @__PURE__ */ React.createElement("img", { src: "assets/img/logo-pawpad-new-transparent.png", alt: "Pawpad" })), /* @__PURE__ */ React.createElement("nav", { className: "nav-links desktop-only", "aria-label": "Primary" }, NAV_ITEMS.map((item) => /* @__PURE__ */ React.createElement("a", { key: item.key, href: hrefFor(item.key), className: "nav-link " + (route === item.key ? "active" : "") }, item.label))), /* @__PURE__ */ React.createElement("div", { className: "nav-cta desktop-only" }, /* @__PURE__ */ React.createElement("button", { className: "nav-cart-btn", onClick: handleOpenCart, "aria-label": `Shopping cart with ${cartCount} items` }, /* @__PURE__ */ React.createElement(CartIcon, { size: 18 }), cartCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "nav-cart-badge" }, cartCount))), /* @__PURE__ */ React.createElement("div", { className: "mobile-nav-actions mobile-only" }, /* @__PURE__ */ React.createElement("button", { className: "nav-cart-btn mobile-cart-btn", onClick: handleOpenCart, "aria-label": `Shopping cart with ${cartCount} items` }, /* @__PURE__ */ React.createElement(CartIcon, { size: 18 }), cartCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "nav-cart-badge" }, cartCount)), /* @__PURE__ */ React.createElement("button", { className: "hamburger", onClick: () => setOpen(true), "aria-label": "Open menu" }, /* @__PURE__ */ React.createElement("span", null), /* @__PURE__ */ React.createElement("span", null), /* @__PURE__ */ React.createElement("span", null))))), open && /* @__PURE__ */ React.createElement("div", { className: "mobile-menu", onClick: () => setOpen(false) }, /* @__PURE__ */ React.createElement("div", { className: "mobile-menu-inner", onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("button", { className: "close", onClick: () => setOpen(false), "aria-label": "Close menu" }, "\xD7"), /* @__PURE__ */ React.createElement("div", { className: "mobile-links" }, NAV_ITEMS.map((item) => /* @__PURE__ */ React.createElement(
+  return /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("header", { className: "nav " + (scrolled ? "scrolled" : "") }, /* @__PURE__ */ React.createElement("div", { className: "container nav-inner" }, /* @__PURE__ */ React.createElement("a", { href: hrefFor("home"), className: "nav-brand", "aria-label": "Pawpad home" }, /* @__PURE__ */ React.createElement("img", { src: "assets/img/logo-pawpad-new-transparent.webp", alt: "Pawpad" })), /* @__PURE__ */ React.createElement("nav", { className: "nav-links desktop-only", "aria-label": "Primary" }, NAV_ITEMS.map((item) => /* @__PURE__ */ React.createElement("a", { key: item.key, href: hrefFor(item.key), className: "nav-link " + (route === item.key ? "active" : "") }, item.label))), /* @__PURE__ */ React.createElement("div", { className: "nav-cta desktop-only" }, /* @__PURE__ */ React.createElement("button", { className: "nav-cart-btn", onClick: handleOpenCart, "aria-label": `Shopping cart with ${cartCount} items` }, /* @__PURE__ */ React.createElement(CartIcon, { size: 18 }), cartCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "nav-cart-badge" }, cartCount))), /* @__PURE__ */ React.createElement("div", { className: "mobile-nav-actions mobile-only" }, /* @__PURE__ */ React.createElement("button", { className: "nav-cart-btn mobile-cart-btn", onClick: handleOpenCart, "aria-label": `Shopping cart with ${cartCount} items` }, /* @__PURE__ */ React.createElement(CartIcon, { size: 18 }), cartCount > 0 && /* @__PURE__ */ React.createElement("span", { className: "nav-cart-badge" }, cartCount)), /* @__PURE__ */ React.createElement("button", { className: "hamburger", onClick: () => setOpen(true), "aria-label": "Open menu" }, /* @__PURE__ */ React.createElement("span", null), /* @__PURE__ */ React.createElement("span", null), /* @__PURE__ */ React.createElement("span", null))))), open && /* @__PURE__ */ React.createElement("div", { className: "mobile-menu", onClick: () => setOpen(false) }, /* @__PURE__ */ React.createElement("div", { className: "mobile-menu-inner", onClick: (e) => e.stopPropagation() }, /* @__PURE__ */ React.createElement("button", { className: "close", onClick: () => setOpen(false), "aria-label": "Close menu" }, "\xD7"), /* @__PURE__ */ React.createElement("div", { className: "mobile-links" }, NAV_ITEMS.map((item) => /* @__PURE__ */ React.createElement(
     "a",
     {
       key: item.key,
@@ -264,7 +264,7 @@ function Footer({ onBook }) {
       ),
       /* @__PURE__ */ React.createElement("div", { className: "footer-bottom" },
         /* @__PURE__ */ React.createElement("div", { className: "brand-mark" },
-          /* @__PURE__ */ React.createElement("img", { src: "assets/img/logo-pawpad-03.png", alt: "Pawpad" })
+          /* @__PURE__ */ React.createElement("img", { src: "assets/img/logo-pawpad-03.webp", alt: "Pawpad" })
         ),
         /* @__PURE__ */ React.createElement("div", { className: "footer-bottom-meta" },
           /* @__PURE__ */ React.createElement("p", { className: "micro" }, "© 2017 Pawpad. All rights reserved."),
@@ -438,7 +438,7 @@ function WhatsAppFloat() {
       className: "wa-float hover-zone",
       "aria-label": "Chat with Pawpad on WhatsApp"
     },
-    /* @__PURE__ */ React.createElement("img", { src: "assets/img/whatsapp-paw.png", alt: "Chat with Pawpad on WhatsApp", draggable: "false" }),
+    /* @__PURE__ */ React.createElement("img", { src: "assets/img/whatsapp-paw.webp", alt: "Chat with Pawpad on WhatsApp", draggable: "false" }),
     /* @__PURE__ */ React.createElement("span", { className: "wa-tip desktop-only" }, "Chat on WhatsApp")
   ), /* @__PURE__ */ React.createElement("style", null, `
         .wa-float {
@@ -469,6 +469,27 @@ function WhatsAppFloat() {
         }
       `));
 }
+function useCmsContent(pageKey, defaultData) {
+  const [content, setContent] = useState(() => {
+    if (window.PawpadContentStore) {
+      return window.PawpadContentStore.get(pageKey);
+    }
+    return defaultData || {};
+  });
+
+  useEffect(() => {
+    const handleUpdate = () => {
+      if (window.PawpadContentStore) {
+        setContent({ ...window.PawpadContentStore.get(pageKey) });
+      }
+    };
+    window.addEventListener("pawpad-content-updated", handleUpdate);
+    return () => window.removeEventListener("pawpad-content-updated", handleUpdate);
+  }, [pageKey]);
+
+  return content;
+}
+
 Object.assign(window, {
   PawIcon,
   Arrow,
@@ -476,6 +497,7 @@ Object.assign(window, {
   FacebookIcon,
   TwitterIcon,
   useReveal,
+  useCmsContent,
   hrefFor,
   ROUTE_HREF,
   CursorTrail,
@@ -486,3 +508,4 @@ Object.assign(window, {
   NAV_ITEMS,
   WhatsAppFloat
 });
+

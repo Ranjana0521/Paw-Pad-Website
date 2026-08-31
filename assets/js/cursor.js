@@ -134,15 +134,18 @@
       }
     }
 
-    function tick() {
-      dx += (mx - dx) * 0.22;
-      dy += (my - dy) * 0.22;
-      dot.style.transform = "translate(" + dx + "px, " + dy + "px) translate(-50%,-50%)";
-      raf = requestAnimationFrame(tick);
+    function onLeave() {
+      dot.style.opacity = "0";
+    }
+
+    function onEnter() {
+      dot.style.opacity = "";
     }
 
     tick();
     window.addEventListener("mousemove", onMove, { passive: true });
+    document.addEventListener("mouseleave", onLeave);
+    document.addEventListener("mouseenter", onEnter);
   }
 
   if (document.readyState === "loading") {

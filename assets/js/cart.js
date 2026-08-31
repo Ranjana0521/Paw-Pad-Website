@@ -248,7 +248,7 @@ const CART_CATALOG = [
     requiresPetInfo: true,
     isCatOnly: true,
     petType: "Cat",
-    img: "assets/img/pawpad/bath-brush-cats.jpg?v=2"
+    img: "assets/img/pawpad/bath-brush-cats.webp"
   },
   {
     id: "bath-brush-subscription",
@@ -259,7 +259,7 @@ const CART_CATALOG = [
     desc: "Keep your pet's coat consistently clean and healthy with regular bath-and-brush visits, spaced through the month.",
     requiresPetInfo: true,
     allowPetTypeSelection: true,
-    img: "assets/img/pawpad/bath-brush-subscription.jpg?v=2"
+    img: "assets/img/pawpad/bath-brush-subscription.webp"
   }
 ];
 

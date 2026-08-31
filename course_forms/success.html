@@ -323,7 +323,7 @@ color: #ffffff !important;
 <header class="nav">
   <div class="container nav-inner">
     <a href="../index.html" class="nav-brand" aria-label="Pawpad home">
-      <img src="../assets/img/logo-pawpad-new-transparent.png" alt="Pawpad">
+      <img src="../assets/img/logo-pawpad-new-transparent.webp" alt="Pawpad">
     </a>
     <nav class="nav-links desktop-only" aria-label="Primary">
       <a href="../about.html" class="nav-link">About</a>
@@ -375,13 +375,16 @@ color: #ffffff !important;
     <div class="eyebrow">Pawpad Academy</div>
     <h1>Application Received</h1>
     <p class="message">Thank you! Your application has been submitted successfully.</p>
-    <p class="sub-message">We review course applications on a rolling basis. Our team will reach out to you shortly with batch details and next steps.</p>
+    <div id="app-ref-badge" style="display:none;margin:16px 0;padding:10px 18px;background:color-mix(in oklab, var(--champagne), transparent 40%);border:1px dashed var(--gold);border-radius:10px;font-family:monospace;font-size:15px;color:var(--ink);font-weight:600;">
+      Application Reference: <span id="app-ref-id" style="color:var(--gold-deep);"></span>
+    </div>
+    <p class="sub-message">We review course applications on a rolling basis. Our admissions team will review your responses and reach out to you with interview details and next steps.</p>
     <a href="../courses.html" class="cta-btn">Return to Courses</a>
   </main>
 </div>
 
 <a href="https://wa.me/918885349267?text=Hello%2C%20I%20would%20like%20to%20know%20more%20about%20your%20services." target="_blank" rel="noopener noreferrer" class="wa-float" aria-label="Chat with Pawpad on WhatsApp">
-  <img src="../assets/img/whatsapp-paw.png" alt="Chat with Pawpad on WhatsApp" draggable="false">
+  <img src="../assets/img/whatsapp-paw.webp" alt="Chat with Pawpad on WhatsApp" draggable="false">
   <span class="wa-tip desktop-only">Chat on WhatsApp</span>
 </a>
 
@@ -394,8 +397,21 @@ color: #ffffff !important;
     hamburger&&menu&&hamburger.addEventListener('click',function(){menu.style.display='block';});
     closeBtn&&menu&&closeBtn.addEventListener('click',function(){menu.style.display='none';});
     menu&&menu.addEventListener('click',function(e){if(e.target===menu)menu.style.display='none';});
+
+    var params = new URLSearchParams(window.location.search);
+    var appId = params.get('app_id');
+    if (appId) {
+      var badge = document.getElementById('app-ref-badge');
+      var refId = document.getElementById('app-ref-id');
+      if (badge && refId) {
+        refId.innerText = appId;
+        badge.style.display = 'inline-block';
+      }
+    }
   })();
 </script>
+  <script src="../assets/js/content-store.js"></script>
+  <script src="../assets/js/applications-store.js"></script>
   <script src="../assets/js/cursor.js"></script>
 
 <footer class="site-footer">
@@ -440,7 +456,7 @@ color: #ffffff !important;
     </div>
     <div class="footer-bottom">
       <div class="brand-mark">
-        <img src="../assets/img/logo-pawpad-03.png" alt="Pawpad">
+        <img src="../assets/img/logo-pawpad-03.webp" alt="Pawpad">
       </div>
       <div class="footer-bottom-meta">
         <p class="micro">© 2017 Pawpad. All rights reserved.</p>

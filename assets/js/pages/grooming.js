@@ -185,7 +185,7 @@ const GROOM_PACKAGES = [
     duration: "BATH & BRUSH",
     isCatOnly: true,
     petType: "Cat",
-    img: "assets/img/pawpad/bath-brush-cats.jpg?v=2",
+    img: "assets/img/pawpad/bath-brush-cats.webp",
     includes: [
       "Bath",
       "Full blow dry",
@@ -207,7 +207,7 @@ const GROOM_PACKAGES = [
     priceNum: 3496.5,
     duration: "VALID 2 MONTHS",
     allowPetTypeSelection: true,
-    img: "assets/img/pawpad/bath-brush-subscription.jpg?v=2",
+    img: "assets/img/pawpad/bath-brush-subscription.webp",
     includes: [
       "4 Bath & Brush sessions",
       "For dogs & cats",
@@ -231,13 +231,14 @@ const ADD_ONS = [
   { name: "Pawpad signature pamper-pack", price: "+ ₹900" }
 ];
 function GroomingHero({ onBook }) {
-  return /* @__PURE__ */ React.createElement("section", { className: "g-hero" }, /* @__PURE__ */ React.createElement("div", { className: "container g-hero-grid" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "eyebrow reveal in" }, "Grooming services"), /* @__PURE__ */ React.createElement("h1", { className: "h-display reveal in", style: { marginTop: 24 } }, "Stress-free ", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "grooming")), /* @__PURE__ */ React.createElement("p", { className: "lead reveal in", style: { marginTop: 24, maxWidth: "54ch" } }, "Conscious pet grooming in Bangalore — built around coat health, hygiene, gentle handling, and emotional wellbeing. Every session is paced around your pet's comfort."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32 } }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: onBook }, "Book a grooming session ", /* @__PURE__ */ React.createElement(Arrow, null)), /* @__PURE__ */ React.createElement("a", {
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("grooming") : (window.PawpadContentStore ? window.PawpadContentStore.get("grooming") : {});
+  return /* @__PURE__ */ React.createElement("section", { className: "g-hero" }, /* @__PURE__ */ React.createElement("div", { className: "container g-hero-grid" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "eyebrow reveal in" }, cms.eyebrow || "Grooming services"), /* @__PURE__ */ React.createElement("h1", { className: "h-display reveal in", style: { marginTop: 24 } }, cms.title || "Stress-free ", /* @__PURE__ */ React.createElement("br", null), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "grooming")), /* @__PURE__ */ React.createElement("p", { className: "lead reveal in", style: { marginTop: 24, maxWidth: "54ch" } }, cms.lead || "Conscious pet grooming in Bangalore — built around coat health, hygiene, gentle handling, and emotional wellbeing. Every session is paced around your pet's comfort."), /* @__PURE__ */ React.createElement("div", { style: { display: "flex", gap: 14, flexWrap: "wrap", marginTop: 32 } }, /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary", onClick: onBook }, "Book a grooming session ", /* @__PURE__ */ React.createElement(Arrow, null)), /* @__PURE__ */ React.createElement("a", {
     href: "#packages", className: "btn btn-ghost", onClick: (e) => {
       var _a;
       e.preventDefault();
       (_a = document.getElementById("packages")) == null ? void 0 : _a.scrollIntoView({ behavior: "smooth" });
     }
-  }, "View packages ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("div", { className: "g-hero-img reveal in" }, /* @__PURE__ */ React.createElement("div", { className: "blob-1" }, /* @__PURE__ */ React.createElement("img", { src: "assets/img/pawpad/grooming-snapshot-new.webp", alt: "A dog being groomed", fetchpriority: "high", decoding: "async" })))), /* @__PURE__ */ React.createElement("style", null, `
+  }, "View packages ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("div", { className: "g-hero-img reveal in" }, /* @__PURE__ */ React.createElement("div", { className: "blob-1" }, /* @__PURE__ */ React.createElement("img", { src: cms.heroImage || "assets/img/pawpad/grooming-snapshot-new.webp", alt: "A dog being groomed", fetchpriority: "high", decoding: "async" })))), /* @__PURE__ */ React.createElement("style", null, `
         .g-hero { padding: 180px 0 60px; }
         .g-hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
         .g-hero-img .blob-1 {
@@ -251,21 +252,108 @@ function GroomingHero({ onBook }) {
         }
       `));
 }
+function getGroomingPackageSortScore(pkg) {
+  if (!pkg) return 999;
+  const key = String(pkg.key || "").toLowerCase().trim();
+  const title = String(pkg.title || "").toLowerCase().trim();
+  const cat = String(pkg.cat || "").toLowerCase().trim();
+  const petType = String(pkg.petType || "").toLowerCase().trim();
+  const isDog = pkg.isDogOnly === true || petType === "dog";
+  const isCat = pkg.isCatOnly === true || petType === "cat";
+
+  // Section 3: Care, Add-ons & Bath packages (exact live website order)
+  // 3.1 Hygiene Clip
+  if (key === "hygiene-clip" || title.includes("hygiene clip") || title.includes("sanitary clip") || title.includes("sanitary trim")) {
+    return 301;
+  }
+  // 3.2 Nail Clipping
+  if (key === "nail-clipping" || title.includes("nail clip") || title.includes("nail trimming") || title === "nail care") {
+    return 302;
+  }
+  // 3.3 Massage
+  if (key === "massage" || title.includes("massage") || title.includes("wellness add-on")) {
+    return 303;
+  }
+  // 3.4 Bath & Brush | Dogs
+  if ((key === "bath-brush-dogs" || (title.includes("bath") && title.includes("brush") && title.includes("dog"))) && !title.includes("subscription") && !title.includes("package")) {
+    return 304;
+  }
+  // 3.5 Bath & Brush | Cats
+  if ((key === "bath-brush-cats" || (title.includes("bath") && title.includes("brush") && title.includes("cat"))) && !title.includes("subscription") && !title.includes("package")) {
+    return 305;
+  }
+  // 3.6 Bath & Brush Subscription package
+  if (key === "bath-brush-subscription" || (title.includes("bath") && title.includes("brush") && (title.includes("subscription") || title.includes("package")))) {
+    return 306;
+  }
+
+  // Section 1: Dog related services
+  if (
+    cat === "dog" ||
+    cat === "puppy" ||
+    cat === "styling" ||
+    isDog ||
+    key.includes("dog") ||
+    key.includes("puppy") ||
+    title.includes("dog") ||
+    title.includes("puppy") ||
+    title.includes("canine")
+  ) {
+    return 100;
+  }
+
+  // Section 2: Cat related services
+  if (
+    cat === "cat" ||
+    isCat ||
+    key.includes("cat") ||
+    title.includes("cat") ||
+    title.includes("kitten") ||
+    title.includes("feline")
+  ) {
+    return 200;
+  }
+
+  // Section 4: General / Other future services
+  return 400;
+}
+
+function sortGroomingPackages(packages) {
+  if (!Array.isArray(packages)) return [];
+  return packages
+    .map((pkg, index) => ({ pkg, index, score: getGroomingPackageSortScore(pkg) }))
+    .sort((a, b) => {
+      if (a.score !== b.score) {
+        return a.score - b.score;
+      }
+      return a.index - b.index;
+    })
+    .map((item) => item.pkg);
+}
+
 function GroomingPackages({ onBook, onAddToCart }) {
   const cats = ["Puppy", "Dog", "Cat", "Care", "Wellness", "Styling"];
   const [filter, setFilter] = useStateG("All");
   const [open, setOpen] = useStateG(null);
-  const filtered = filter === "All" ? GROOM_PACKAGES : GROOM_PACKAGES.filter((p) => p.cat === filter);
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("grooming") : (window.PawpadContentStore ? window.PawpadContentStore.get("grooming") : {});
+  const rawPackages = (cms.packages && Array.isArray(cms.packages)) ? cms.packages : GROOM_PACKAGES;
+  const packagesList = sortGroomingPackages(rawPackages);
+  const filtered = filter === "All" ? packagesList : packagesList.filter((p) => p.cat === filter);
 
   const handleAddToCart = (p) => {
     const catalogItem = (typeof CART_CATALOG !== "undefined" ? CART_CATALOG : []).find((c) => c.id === p.key);
     let priceNum = p.priceNum;
+    if (p.price) {
+      const parsed = parseFloat(String(p.price).replace(/,/g, "").replace(/[^0-9.]/g, ""));
+      if (!isNaN(parsed) && parsed > 0) {
+        priceNum = parsed;
+      }
+    }
     if (priceNum === undefined) {
       if (catalogItem && catalogItem.price !== undefined) {
         priceNum = catalogItem.price;
       } else {
-        const cleanStr = String(p.price || "").replace(/,/g, "").replace(/[^0-9.]/g, "");
-        priceNum = parseFloat(cleanStr) || 1000;
+        priceNum = 1000;
       }
     }
     const cartItem = {
@@ -293,7 +381,9 @@ function GroomingPackages({ onBook, onAddToCart }) {
 
   return /* @__PURE__ */ React.createElement("section", { className: "g-packages", id: "packages" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "g-pkg-head reveal" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Grooming Categories"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "16ch" } }, "Grooming care ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "for every coat"))), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-filter" }, ["All", ...cats].map((c) => /* @__PURE__ */ React.createElement("button", { key: c, className: "g-filter-btn " + (filter === c ? "on" : ""), onClick: () => setFilter(c) }, c)))), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-grid" }, filtered.map((p, i) => {
     const isOpen = open === p.key;
-    return /* @__PURE__ */ React.createElement("article", { key: p.key, className: "g-pkg-card " + (isOpen ? "open" : ""), style: { transitionDelay: `${i * 60}ms` } }, /* @__PURE__ */ React.createElement("div", { className: "g-pkg-img" }, /* @__PURE__ */ React.createElement("img", { src: p.img, alt: p.title }), /* @__PURE__ */ React.createElement("span", { className: "tag" }, p.cat)), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-body" }, /* @__PURE__ */ React.createElement("div", { className: "g-pkg-top" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, p.title), /* @__PURE__ */ React.createElement("p", { className: "mute", style: { margin: "4px 0 0", fontSize: 13 } }, p.sub)), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-price" }, /* @__PURE__ */ React.createElement("strong", null, p.price), /* @__PURE__ */ React.createElement("span", null, p.duration))), /* @__PURE__ */ React.createElement("p", { className: "g-pkg-note" }, p.note), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-details" }, /* @__PURE__ */ React.createElement("h5", null, "Included"), /* @__PURE__ */ React.createElement("ul", null, p.includes.map((inc) => /* @__PURE__ */ React.createElement("li", { key: inc }, /* @__PURE__ */ React.createElement(PawIcon, { size: 10, color: "var(--driftwood)" }), " ", inc))), p.notIncludes && p.notIncludes.length > 0 ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("h5", { style: { marginTop: 16 } }, "Not Included"), /* @__PURE__ */ React.createElement("ul", null, p.notIncludes.map((ninc) => /* @__PURE__ */ React.createElement("li", { key: ninc, style: { color: "var(--ink-mute)" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "var(--driftwood)", fontSize: 12, marginRight: 4, fontWeight: 700 } }, "—"), " ", ninc)))) : null), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-actions" }, /* @__PURE__ */ React.createElement("button", { className: "g-pkg-toggle", onClick: () => setOpen(isOpen ? null : p.key) }, isOpen ? "Show less" : "Show more", " ", /* @__PURE__ */ React.createElement("span", { className: "g-pkg-arrow" }, isOpen ? "\u2212" : "+")), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => handleAddToCart(p) }, "Add to cart ", /* @__PURE__ */ React.createElement(Arrow, { size: 12 })))));
+    const includesList = Array.isArray(p.includes) ? p.includes : [];
+    const notIncludesList = Array.isArray(p.notIncludes) ? p.notIncludes : [];
+    return /* @__PURE__ */ React.createElement("article", { key: p.key, className: "g-pkg-card " + (isOpen ? "open" : ""), style: { transitionDelay: `${i * 60}ms` } }, /* @__PURE__ */ React.createElement("div", { className: "g-pkg-img" }, /* @__PURE__ */ React.createElement("img", { src: p.img, alt: p.title }), /* @__PURE__ */ React.createElement("span", { className: "tag" }, p.cat)), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-body" }, /* @__PURE__ */ React.createElement("div", { className: "g-pkg-top" }, /* @__PURE__ */ React.createElement("div", null, /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, p.title), /* @__PURE__ */ React.createElement("p", { className: "mute", style: { margin: "4px 0 0", fontSize: 13 } }, p.sub)), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-price" }, /* @__PURE__ */ React.createElement("strong", null, p.price), /* @__PURE__ */ React.createElement("span", null, p.duration))), /* @__PURE__ */ React.createElement("p", { className: "g-pkg-note" }, p.note), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-details" }, /* @__PURE__ */ React.createElement("h5", null, "Included"), /* @__PURE__ */ React.createElement("ul", null, includesList.map((inc) => /* @__PURE__ */ React.createElement("li", { key: inc }, /* @__PURE__ */ React.createElement(PawIcon, { size: 10, color: "var(--driftwood)" }), " ", inc))), notIncludesList.length > 0 ? /* @__PURE__ */ React.createElement(React.Fragment, null, /* @__PURE__ */ React.createElement("h5", { style: { marginTop: 16 } }, "Not Included"), /* @__PURE__ */ React.createElement("ul", null, notIncludesList.map((ninc) => /* @__PURE__ */ React.createElement("li", { key: ninc, style: { color: "var(--ink-mute)" } }, /* @__PURE__ */ React.createElement("span", { style: { color: "var(--driftwood)", fontSize: 12, marginRight: 4, fontWeight: 700 } }, "—"), " ", ninc)))) : null), /* @__PURE__ */ React.createElement("div", { className: "g-pkg-actions" }, /* @__PURE__ */ React.createElement("button", { className: "g-pkg-toggle", onClick: () => setOpen(isOpen ? null : p.key) }, isOpen ? "Show less" : "Show more", " ", /* @__PURE__ */ React.createElement("span", { className: "g-pkg-arrow" }, isOpen ? "\u2212" : "+")), /* @__PURE__ */ React.createElement("button", { className: "btn btn-primary btn-sm", onClick: () => handleAddToCart(p) }, "Add to cart ", /* @__PURE__ */ React.createElement(Arrow, { size: 12 })))));
   })), /* @__PURE__ */ React.createElement("p", { className: "g-pkg-footnote reveal" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }), "Please refer to the notes below for grooming duration, appointment policies, and important grooming guidelines. Add-on services are available exclusively alongside a full grooming package.")), /* @__PURE__ */ React.createElement("style", null, `
         .g-packages { background: var(--cream-bg); padding-top: 0; padding-bottom: 24px; }
         .g-pkg-head {
@@ -398,7 +488,9 @@ function GroomingPackages({ onBook, onAddToCart }) {
       `));
 }
 function AddOnsSection() {
-  return /* @__PURE__ */ React.createElement("section", { className: "addons" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "addons-head reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Add-ons"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "18ch" } }, "Little extras ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "Big difference"))), /* @__PURE__ */ React.createElement("div", { className: "addons-grid reveal" }, ADD_ONS.map((a, i) => /* @__PURE__ */ React.createElement("div", { key: a.name, className: "addon-row" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }), /* @__PURE__ */ React.createElement("span", { className: "addon-name" }, a.name), /* @__PURE__ */ React.createElement("span", { className: "addon-price" }, a.price)))), /* @__PURE__ */ React.createElement("p", { className: "addons-disclaimer reveal" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 13, color: "var(--driftwood)" }), " Disclaimer: Add-on services are available exclusively alongside a full grooming session and cannot be booked as standalone treatments.")), /* @__PURE__ */ React.createElement("style", null, `
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("grooming") : (window.PawpadContentStore ? window.PawpadContentStore.get("grooming") : {});
+  const addOnsList = (cms.addOns && Array.isArray(cms.addOns)) ? cms.addOns : ADD_ONS;
+  return /* @__PURE__ */ React.createElement("section", { className: "addons" }, /* @__PURE__ */ React.createElement("div", { className: "container" }, /* @__PURE__ */ React.createElement("div", { className: "addons-head reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, "Add-ons"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "18ch" } }, "Little extras ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, "Big difference"))), /* @__PURE__ */ React.createElement("div", { className: "addons-grid reveal" }, addOnsList.map((a, i) => /* @__PURE__ */ React.createElement("div", { key: a.name, className: "addon-row" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 14, color: "var(--driftwood)" }), /* @__PURE__ */ React.createElement("span", { className: "addon-name" }, a.name), /* @__PURE__ */ React.createElement("span", { className: "addon-price" }, a.price)))), /* @__PURE__ */ React.createElement("p", { className: "addons-disclaimer reveal" }, /* @__PURE__ */ React.createElement(PawIcon, { size: 13, color: "var(--driftwood)" }), " Disclaimer: Add-on services are available exclusively alongside a full grooming session and cannot be booked as standalone treatments.")), /* @__PURE__ */ React.createElement("style", null, `
         .addons { background: var(--champagne-soft); }
         .addons-head { max-width: 720px; margin-bottom: 48px; }
         .addons-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
@@ -466,4 +558,4 @@ function GroomingPage({ onBook, onAddToCart }) {
   useReveal();
   return /* @__PURE__ */ React.createElement("div", { className: "page-enter" }, /* @__PURE__ */ React.createElement(GroomingHero, { onBook }), /* @__PURE__ */ React.createElement(GroomingPackages, { onBook, onAddToCart }), /* @__PURE__ */ React.createElement(GroomingNotes, null));
 }
-Object.assign(window, { GroomingPage });
+Object.assign(window, { GroomingPage, sortGroomingPackages, GROOM_PACKAGES });
