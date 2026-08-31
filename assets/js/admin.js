@@ -11,7 +11,7 @@
 (function () {
   const { useState, useEffect, useRef, useMemo } = React;
 
-  const DEFAULT_WHITELIST = ["tharunsn04@gmail.com", "test@test.com"];
+  const DEFAULT_WHITELIST = ["tharunsn04@gmail.com", "ranjana0521@gmail.com", "test@test.com"];
   const WHITELIST_STORAGE_KEY = "pawpad_admin_whitelist";
   const GOOGLE_CLIENT_ID_KEY = "pawpad_admin_google_client_id";
   const GOOGLE_CLIENT_ID = "1057951951261-m9vj6tc6lkbr68rg5nb91pjt2f5tqf25.apps.googleusercontent.com";
