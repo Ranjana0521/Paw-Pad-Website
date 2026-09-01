@@ -78,7 +78,7 @@
     const [gisLoaded, setGisLoaded] = useState(false);
     const [showPinAuth, setShowPinAuth] = useState(false);
     const [pinInput, setPinInput] = useState("");
-    const [pinEmail, setPinEmail] = useState("tharunsn04@gmail.com");
+    const [pinEmail, setPinEmail] = useState("");
     const googleBtnRef = useRef(null);
 
     const whitelist = useMemo(() => getWhitelistedEmails(), []);
@@ -271,7 +271,7 @@
               required: true,
               value: pinEmail,
               onChange: (e) => setPinEmail(e.target.value),
-              placeholder: "Enter your Email"
+              placeholder: "Enter your email"
             })
           ),
           React.createElement("div", null,
