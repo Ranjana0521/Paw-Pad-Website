@@ -134,6 +134,13 @@
       }
     }
 
+    function tick() {
+      dx += (mx - dx) * 0.22;
+      dy += (my - dy) * 0.22;
+      dot.style.transform = "translate(" + dx + "px, " + dy + "px) translate(-50%,-50%)";
+      raf = requestAnimationFrame(tick);
+    }
+
     function onLeave() {
       dot.style.opacity = "0";
     }
@@ -148,9 +155,15 @@
     document.addEventListener("mouseenter", onEnter);
   }
 
+  // Guard against running in admin panel
+  if (typeof window !== "undefined" && window.location.pathname.includes("admin.html")) {
+    return;
+  }
+
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", initCursor);
   } else {
     initCursor();
   }
 })();
+
