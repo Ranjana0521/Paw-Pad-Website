@@ -7,7 +7,7 @@ const GROOM_PACKAGES = [
     cat: "Puppy",
     key: "puppy-short",
     title: "Puppy Grooming | Short Hair",
-    sub: "Gentle introductions for puppies below 3 months",
+    sub: "Gentle introductions for puppies below 6 months",
     price: "₹1,000",
     duration: "Gentle intro",
     img: "assets/img/pawpad/grooming-page-puppy-short-hair-image.webp",

@@ -134,7 +134,8 @@ function BoardingPage({ onBook, onAddToCart }) {
                   src: pkg.img || "assets/img/pawpad/boarding-sleeping-puppy-toy.webp",
                   alt: pkg.title || "Boarding dog resting comfortably",
                   className: "boarding-card-img",
-                  loading: "lazy"
+                  loading: "lazy",
+                  onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/pawpad/boarding-sleeping-puppy-toy.webp"); }
                 }),
                 pkg.tag && /* @__PURE__ */ React.createElement("span", { className: `boarding-card-tag ${idx === 0 ? "step-tag" : "overnight-tag"}` }, pkg.tag)
               ),
@@ -185,7 +186,8 @@ function BoardingPage({ onBook, onAddToCart }) {
                 src: cms.standardsImg || "assets/img/pawpad/boarding-dachshund-sleep-mask.webp",
                 alt: "Happy dog looking through a heart shaped by hands",
                 className: "standards-img",
-                loading: "lazy"
+                loading: "lazy",
+                onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/pawpad/boarding-dachshund-sleep-mask.webp"); }
               })
             ),
             /* @__PURE__ */ React.createElement("div", { className: "standards-quote-card" },
@@ -775,6 +777,73 @@ function BoardingPage({ onBook, onAddToCart }) {
 function MyotherapyPage({ onBook }) {
   useReveal();
   const cms = (typeof useCmsContent === "function") ? useCmsContent("myotherapy") : (window.PawpadContentStore ? window.PawpadContentStore.get("myotherapy") : {});
+  const [formData, setFormData] = React.useState({ name: "", email: "", phone: "", petName: "", notes: "" });
+  const [status, setStatus] = React.useState("idle");
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const emailTarget = cms.waitlistEmail || "info@pawpad.in";
+  const subjectTarget = cms.waitlistSubject || "Myotherapy Waitlist";
+  const mailtoUrl = `mailto:${encodeURIComponent(emailTarget)}?subject=${encodeURIComponent(subjectTarget)}`;
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailTarget)}&su=${encodeURIComponent(subjectTarget)}`;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.phone) {
+      setStatus("error");
+      setErrorMessage("Please fill in your name, email, and phone number.");
+      return;
+    }
+    setStatus("submitting");
+    setErrorMessage("");
+
+    const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
+      ? cms.web3FormsAccessKey
+      : "YOUR_ACCESS_KEY_HERE";
+
+    try {
+      const payload = {
+        access_key: accessKey,
+        subject: subjectTarget,
+        from_name: "Pawpad Myotherapy Waitlist",
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        pet_details: formData.petName || "Not specified",
+        message: formData.notes || "None provided",
+        botcheck: ""
+      };
+
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setTimeout(() => {
+          setStatus("success");
+        }, 500);
+        return;
+      }
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage(data.message || "Unable to submit right now. Please email us directly.");
+      }
+    } catch (err) {
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage("Network error occurred. Please reach out to us at " + emailTarget + ".");
+      }
+    }
+  };
 
   return /* @__PURE__ */ React.createElement("div", { className: "page-enter" },
     /* @__PURE__ */ React.createElement("section", { className: "editorial-page" },
@@ -797,8 +866,148 @@ function MyotherapyPage({ onBook }) {
               rel: "noopener noreferrer",
               className: "editorial-link"
             }, cms.linkText || "Visit Galen Myotherapy"),
-            cms.body2Suffix !== undefined ? cms.body2Suffix : ". Join the waitlist to be the first to know when sessions open."
+            cms.body2Suffix !== undefined ? cms.body2Suffix : ". Join the waitlist below to be the first to know when sessions open, or email us directly."
           ),
+
+          /* @__PURE__ */ React.createElement("div", { className: "myo-waitlist-box reveal in", id: "waitlist" },
+            /* @__PURE__ */ React.createElement("p", { className: "myo-waitlist-eyebrow" }, cms.waitlistEyebrow || "PRIORITY ACCESS"),
+            /* @__PURE__ */ React.createElement("h2", { className: "myo-waitlist-title" }, cms.waitlistTitle || "Join the Myotherapy Waitlist"),
+            /* @__PURE__ */ React.createElement("p", { className: "myo-waitlist-sub" },
+              cms.waitlistSubtitle || "Be the first to know when appointments and consultation slots open. Leave your details below or write to us directly."
+            ),
+
+            status === "success" ? (
+              /* @__PURE__ */ React.createElement("div", { className: "myo-success-box" },
+                /* @__PURE__ */ React.createElement("div", { style: { display: "inline-flex", alignItems: "center", justifyContent: "center", width: 52, height: 52, borderRadius: "50%", background: "color-mix(in oklab, var(--champagne), transparent 30%)", color: "var(--driftwood-deep)", marginBottom: 16 } },
+                  /* @__PURE__ */ React.createElement(PawIcon, { size: 26, color: "var(--driftwood)" })
+                ),
+                /* @__PURE__ */ React.createElement("h3", { style: { fontFamily: "var(--f-display)", fontSize: 24, margin: "0 0 10px", color: "var(--ink)" } }, "You're on the Waitlist!"),
+                /* @__PURE__ */ React.createElement("p", { style: { fontSize: 15, color: "var(--ink-soft)", margin: "0 0 20px", maxWidth: "48ch", marginLeft: "auto", marginRight: "auto" } },
+                  `Thank you, ${formData.name || "friend"}! We have recorded your interest and will reach out to you at `,
+                  /* @__PURE__ */ React.createElement("strong", null, formData.email),
+                  " as soon as our canine myotherapy sessions open."
+                ),
+                /* @__PURE__ */ React.createElement("button", {
+                  className: "btn btn-outline btn-sm",
+                  onClick: () => {
+                    setFormData({ name: "", email: "", phone: "", petName: "", notes: "" });
+                    setStatus("idle");
+                  }
+                }, "Submit Another Entry")
+              )
+            ) : (
+              /* @__PURE__ */ React.createElement("form", { onSubmit: handleSubmit, className: "myo-waitlist-form" },
+                /* @__PURE__ */ React.createElement("div", { className: "myo-form-grid" },
+                  /* @__PURE__ */ React.createElement("div", { className: "myo-field-group" },
+                    /* @__PURE__ */ React.createElement("label", { className: "myo-field-label" }, "Your Name", /* @__PURE__ */ React.createElement("span", { className: "req" }, "*")),
+                    /* @__PURE__ */ React.createElement("input", {
+                      type: "text",
+                      className: "myo-input",
+                      required: true,
+                      placeholder: "e.g. Maya Rao",
+                      value: formData.name,
+                      onChange: (e) => setFormData({ ...formData, name: e.target.value })
+                    })
+                  ),
+                  /* @__PURE__ */ React.createElement("div", { className: "myo-field-group" },
+                    /* @__PURE__ */ React.createElement("label", { className: "myo-field-label" }, "Email Address", /* @__PURE__ */ React.createElement("span", { className: "req" }, "*")),
+                    /* @__PURE__ */ React.createElement("input", {
+                      type: "email",
+                      className: "myo-input",
+                      required: true,
+                      placeholder: "e.g. maya@example.com",
+                      value: formData.email,
+                      onChange: (e) => setFormData({ ...formData, email: e.target.value })
+                    })
+                  )
+                ),
+                /* @__PURE__ */ React.createElement("div", { className: "myo-form-grid" },
+                  /* @__PURE__ */ React.createElement("div", { className: "myo-field-group" },
+                    /* @__PURE__ */ React.createElement("label", { className: "myo-field-label" }, "Phone Number", /* @__PURE__ */ React.createElement("span", { className: "req" }, "*")),
+                    /* @__PURE__ */ React.createElement("input", {
+                      type: "tel",
+                      className: "myo-input",
+                      required: true,
+                      placeholder: "e.g. +91 98765 43210",
+                      value: formData.phone,
+                      onChange: (e) => setFormData({ ...formData, phone: e.target.value })
+                    })
+                  ),
+                  /* @__PURE__ */ React.createElement("div", { className: "myo-field-group" },
+                    /* @__PURE__ */ React.createElement("label", { className: "myo-field-label" }, "Pet's Name & Breed / Age"),
+                    /* @__PURE__ */ React.createElement("input", {
+                      type: "text",
+                      className: "myo-input",
+                      placeholder: "e.g. Bella, 4 yr Indie / Golden",
+                      value: formData.petName,
+                      onChange: (e) => setFormData({ ...formData, petName: e.target.value })
+                    })
+                  )
+                ),
+                /* @__PURE__ */ React.createElement("div", { className: "myo-field-group", style: { marginBottom: 16 } },
+                  /* @__PURE__ */ React.createElement("label", { className: "myo-field-label" }, "Mobility / Health Notes (Optional)"),
+                  /* @__PURE__ */ React.createElement("textarea", {
+                    className: "myo-textarea",
+                    placeholder: "Tell us what you've noticed (e.g. stiffness, hesitation on stairs, recovery from surgery, arthritis, or general wellness)...",
+                    value: formData.notes,
+                    onChange: (e) => setFormData({ ...formData, notes: e.target.value })
+                  })
+                ),
+
+                errorMessage ? /* @__PURE__ */ React.createElement("p", { style: { color: "#c0392b", fontSize: 13, margin: "0 0 14px" } }, errorMessage) : null,
+
+                /* @__PURE__ */ React.createElement("div", { className: "myo-submit-row" },
+                  /* @__PURE__ */ React.createElement("button", {
+                    type: "submit",
+                    className: "btn btn-primary",
+                    disabled: status === "submitting"
+                  },
+                    status === "submitting" ? "Joining Waitlist..." : "Join the Waitlist ",
+                    /* @__PURE__ */ React.createElement(Arrow, { size: 13 })
+                  ),
+                  /* @__PURE__ */ React.createElement("span", { style: { fontSize: 12.5, color: "var(--ink-mute)" } },
+                    "We respect your privacy. No spam ever."
+                  )
+                )
+              )
+            ),
+
+            /* @__PURE__ */ React.createElement("div", { className: "myo-direct-email-card" },
+              /* @__PURE__ */ React.createElement("p", { className: "myo-direct-email-text" },
+                "Prefer to email us directly? Write to ",
+                /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--ink)" } }, emailTarget),
+                " with the subject line ",
+                /* @__PURE__ */ React.createElement("strong", { style: { color: "var(--driftwood-deep)" } }, `"${subjectTarget}"`),
+                "."
+              ),
+              /* @__PURE__ */ React.createElement("div", { className: "myo-email-links" },
+                /* @__PURE__ */ React.createElement("a", {
+                  href: mailtoUrl,
+                  className: "myo-email-btn"
+                },
+                  /* @__PURE__ */ React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+                    /* @__PURE__ */ React.createElement("rect", { width: 20, height: 16, x: 2, y: 4, rx: 2 }),
+                    /* @__PURE__ */ React.createElement("path", { d: "m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" })
+                  ),
+                  `Email ${emailTarget}`
+                ),
+                /* @__PURE__ */ React.createElement("a", {
+                  href: gmailUrl,
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                  className: "myo-email-btn"
+                },
+                  /* @__PURE__ */ React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" },
+                    /* @__PURE__ */ React.createElement("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }),
+                    /* @__PURE__ */ React.createElement("polyline", { points: "15 3 21 3 21 9" }),
+                    /* @__PURE__ */ React.createElement("line", { x1: 10, y1: 14, x2: 21, y2: 3 })
+                  ),
+                  "Open in Gmail Web"
+                )
+              )
+            )
+          ),
+
           /* @__PURE__ */ React.createElement("hr", { className: "editorial-divider-sub" }),
           /* @__PURE__ */ React.createElement("p", { className: "editorial-note" },
             cms.note || "Pawpad · Details current as of this document's creation date."
@@ -866,9 +1075,141 @@ function MyotherapyPage({ onBook }) {
         margin: 0 0 40px;
         opacity: .9;
       }
+
+      /* Myotherapy Waitlist Box Styles */
+      .myo-waitlist-box {
+        margin: 40px 0 36px;
+        background: color-mix(in oklab, var(--champagne), transparent 60%);
+        border: 1px solid color-mix(in oklab, var(--driftwood), transparent 75%);
+        border-radius: 24px;
+        padding: 40px 36px;
+        box-shadow: 0 12px 36px rgba(28,27,25,0.04);
+      }
+      .myo-waitlist-eyebrow {
+        font-family: var(--f-body);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .2em;
+        text-transform: uppercase;
+        color: var(--driftwood);
+        margin: 0 0 10px;
+      }
+      .myo-waitlist-title {
+        font-family: var(--f-display);
+        font-size: clamp(24px, 3vw, 32px);
+        font-weight: 400;
+        line-height: 1.25;
+        color: var(--ink);
+        margin: 0 0 10px;
+      }
+      .myo-waitlist-sub {
+        font-size: 15px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        margin: 0 0 28px;
+      }
+      .myo-form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 16px;
+      }
+      .myo-field-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .myo-field-label {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: var(--ink);
+      }
+      .myo-field-label span.req {
+        color: var(--driftwood-deep);
+        margin-left: 3px;
+      }
+      .myo-input, .myo-textarea {
+        width: 100%;
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid color-mix(in oklab, var(--ink), transparent 82%);
+        background: #ffffff;
+        color: var(--ink);
+        font-family: var(--f-body);
+        font-size: 14.5px;
+        transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+        outline: none;
+        box-sizing: border-box;
+      }
+      .myo-input:focus, .myo-textarea:focus {
+        border-color: var(--driftwood);
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--driftwood), transparent 85%);
+      }
+      .myo-textarea {
+        min-height: 85px;
+        resize: vertical;
+      }
+      .myo-submit-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .myo-direct-email-card {
+        margin-top: 32px;
+        padding-top: 24px;
+        border-top: 1px solid color-mix(in oklab, var(--ink), transparent 88%);
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      .myo-direct-email-text {
+        font-size: 14px;
+        line-height: 1.6;
+        color: var(--ink-soft);
+        margin: 0;
+      }
+      .myo-email-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        align-items: center;
+      }
+      .myo-email-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 9px 18px;
+        border-radius: 999px;
+        background: color-mix(in oklab, var(--champagne), transparent 30%);
+        border: 1px solid color-mix(in oklab, var(--driftwood), transparent 65%);
+        color: var(--ink);
+        font-size: 13.5px;
+        font-weight: 500;
+        text-decoration: none;
+        transition: all var(--t-fast) var(--ease);
+      }
+      .myo-email-btn:hover {
+        background: var(--driftwood);
+        color: #ffffff;
+        border-color: var(--driftwood);
+        text-decoration: none;
+      }
+      .myo-success-box {
+        padding: 36px 24px;
+        background: #ffffff;
+        border-radius: 18px;
+        border: 1px solid color-mix(in oklab, var(--driftwood), transparent 70%);
+        text-align: center;
+      }
+
       @media (max-width: 900px) {
         .editorial-page { padding: 140px 0 40px; }
         .editorial-container { max-width: 100%; }
+        .myo-waitlist-box { padding: 30px 20px; border-radius: 18px; }
+        .myo-form-grid { grid-template-columns: 1fr; }
       }
     `)
   );

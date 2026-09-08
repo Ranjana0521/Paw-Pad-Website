@@ -5,7 +5,7 @@ const GROOM_PACKAGES = [
     cat: "Puppy",
     key: "puppy-short",
     title: "Puppy Grooming | Short Hair",
-    sub: "Gentle introductions for puppies below 3 months",
+    sub: "Gentle introductions for puppies below 6 months",
     price: "₹1,000",
     duration: "Gentle intro",
     isDogOnly: true,
@@ -238,7 +238,7 @@ function GroomingHero({ onBook }) {
       e.preventDefault();
       (_a = document.getElementById("packages")) == null ? void 0 : _a.scrollIntoView({ behavior: "smooth" });
     }
-  }, "View packages ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("div", { className: "g-hero-img reveal in" }, /* @__PURE__ */ React.createElement("div", { className: "blob-1" }, /* @__PURE__ */ React.createElement("img", { src: cms.heroImage || "assets/img/pawpad/grooming-snapshot-new.webp", alt: "A dog being groomed", fetchpriority: "high", decoding: "async" })))), /* @__PURE__ */ React.createElement("style", null, `
+  }, "View packages ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("div", { className: "g-hero-img reveal in" }, /* @__PURE__ */ React.createElement("div", { className: "blob-1" }, /* @__PURE__ */ React.createElement("img", { src: cms.heroImage || "assets/img/pawpad/grooming-snapshot-new.webp", alt: "A dog being groomed", fetchpriority: "high", decoding: "async", onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/pawpad/grooming-snapshot-new.webp"); } })))), /* @__PURE__ */ React.createElement("style", null, `
         .g-hero { padding: 180px 0 60px; }
         .g-hero-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
         .g-hero-img .blob-1 {

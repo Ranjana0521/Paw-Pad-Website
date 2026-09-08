@@ -321,7 +321,7 @@ function Footer({ onBook }) {
             <div>
               <h4 className="f-h">Address</h4>
               <p>#426, 5th Main Road,<br/>HRBR 2nd Block, Kalyan Nagar<br/>Bangalore - 560043 India</p>
-              <p style={{marginTop:14}}>Ph: <a href="tel:+919663077496">9663077496</a></p>
+              <p style={{marginTop:14}}>Ph: <a href="tel:+919663077496">9663077496</a> / <a href="tel:+919148443330">9148443330</a></p>
               <div className="socials">
                 <a href="#" aria-label="Instagram"><InstagramIcon size={16} /></a>
                 <a href="#" aria-label="Facebook"><FacebookIcon size={16} /></a>

@@ -3,15 +3,6 @@ const { useState: useStateCourse } = React;
 
 const COURSE_LIST = [
   {
-    key: "pacgc",
-    title: "Pawpad Applied Canine & Feline Grooming Certification (PACGC)",
-    price: "₹95,000",
-    priceNum: 95000,
-    duration: "7 weeks",
-    enrollUrl: "course_forms/pawpad-application-pacgc.html",
-    desc: "A 7-week comprehensive programme in conscious canine and feline grooming in Bengaluru. Small cohort of 3 students learning consent-based handling, anatomy, coat care, scissoring, and clipping without restraint."
-  },
-  {
     key: "pcgec",
     title: "Pawpad Canine Grooming Essentials Certificate (PCGEC)",
     price: "₹30,000",
@@ -20,16 +11,6 @@ const COURSE_LIST = [
     knowMoreUrl: "course_forms/pawpad-essentials-dog-page.html",
     enrollUrl: "course_forms/pawpad-application-pcgec.html",
     desc: "A fast, 5-day hands-on introduction to professional dog grooming for complete beginners. Work directly with live dogs from day one under expert supervision to learn bathing, drying, brushing, ear cleaning, and coat-care fundamentals."
-  },
-  {
-    key: "pcgpc",
-    title: "Pawpad Canine Grooming Practitioner Certificate (PCGPC)",
-    price: "₹50,000",
-    priceNum: 50000,
-    duration: "3 weeks",
-    knowMoreUrl: "course_forms/pawpad-practitioner-dog-page.html",
-    enrollUrl: "course_forms/pawpad-application-pcgpc.html",
-    desc: "A 3-week practitioner-level programme designed to build industry-ready technical grounding in canine grooming. Master bathing and coat care, advance to live-dog nail trimming and hygiene clipping, and practice full scissoring techniques on training models."
   },
   {
     key: "pfgec",
@@ -42,6 +23,16 @@ const COURSE_LIST = [
     desc: "A 5-day hands-on introductory course covering feline-specific grooming and handling techniques. Build entry-level competence in cat body language, bathing, drying, brushing, de-matting, and ear care under close instructor guidance."
   },
   {
+    key: "pcgpc",
+    title: "Pawpad Canine Grooming Practitioner Certificate (PCGPC)",
+    price: "₹50,000",
+    priceNum: 50000,
+    duration: "3 weeks",
+    knowMoreUrl: "course_forms/pawpad-practitioner-dog-page.html",
+    enrollUrl: "course_forms/pawpad-application-pcgpc.html",
+    desc: "A 3-week practitioner-level programme designed to build industry-ready technical grounding in canine grooming. Master bathing and coat care, advance to live-dog nail trimming and hygiene clipping, and practice full scissoring techniques on training models."
+  },
+  {
     key: "pfgpc",
     title: "Pawpad Feline Grooming Practitioner Certificate (PFGPC)",
     price: "₹50,000",
@@ -52,14 +43,14 @@ const COURSE_LIST = [
     desc: "An intensive 3-week practitioner course providing hands-on feline grooming mastery. Progress from bathing and coat care to live nail trimming, hygiene clipping, and full haircuts performed directly on live cats."
   },
   {
-    key: "foundations",
-    title: "Pawpad Foundations — Behaviour-Led Grooming for Beginners",
+    key: "pacgc",
+    title: "Pawpad Applied Canine & Feline Grooming Certification (PACGC)",
     price: "₹95,000",
     priceNum: 95000,
     duration: "7 weeks",
     knowMoreUrl: "course_forms/pawpad-foundations-page.html",
-    enrollUrl: "course_forms/pawpad-application-pfbgb.html",
-    desc: "A 7-week foundation-level grooming certification for complete beginners building toward a professional grooming career with both dogs and cats. Learn consent-based handling, anatomy, stress signals, bathing, coat care, scissoring, and clipping without restraint or force."
+    enrollUrl: "course_forms/pawpad-application-pacgc.html",
+    desc: "A 7-week comprehensive programme in conscious canine and feline grooming in Bengaluru. Small cohort of 3 students learning consent-based handling, anatomy, coat care, scissoring, and clipping without restraint."
   },
   {
     key: "studio-consulting-online",
@@ -69,7 +60,7 @@ const COURSE_LIST = [
     duration: "2 Video Calls",
     knowMoreUrl: "course_forms/pawpad-studio-consulting-page.html",
     enrollUrl: "course_forms/pawpad-studio-consulting-page.html",
-    enrollText: "Enroll / Book Now",
+    enrollText: "Book Now",
     desc: "Two video calls plus a written equipment and space brief based on your floor plan or photos. Ideal for remote guidance on budgets, layout, and essential gear."
   },
   {
@@ -80,33 +71,84 @@ const COURSE_LIST = [
     duration: "Full Day On-Site",
     knowMoreUrl: "course_forms/pawpad-studio-consulting-page.html",
     enrollUrl: "course_forms/pawpad-studio-consulting-page.html",
-    enrollText: "Enroll / Book Now",
+    enrollText: "Book Now",
     desc: "A full day on-site assessing your actual space in person before providing customized equipment lists, space recommendations, and operational layout planning."
   }
 ];
+
+function renderCoursesHeroTitle(cms) {
+  if (cms.title1 && cms.titleAccent) {
+    return React.createElement(React.Fragment, null,
+      cms.title1,
+      " ",
+      React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, cms.titleAccent),
+      cms.titleEnd ? ` ${cms.titleEnd}` : null
+    );
+  }
+  const titleText = cms.title || "Learn Conscious Pet Grooming";
+  if (typeof titleText === "string") {
+    if (titleText.includes("Pet Grooming")) {
+      const idx = titleText.indexOf("Pet Grooming");
+      const before = titleText.substring(0, idx);
+      const after = titleText.substring(idx + "Pet Grooming".length);
+      return React.createElement(React.Fragment, null,
+        before,
+        React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, "Pet Grooming"),
+        after || null
+      );
+    }
+    if (titleText.includes("Pet Groomer")) {
+      const idx = titleText.indexOf("Pet Groomer");
+      const before = titleText.substring(0, idx);
+      const after = titleText.substring(idx + "Pet Groomer".length);
+      return React.createElement(React.Fragment, null,
+        before,
+        React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, "Pet Groomer"),
+        after || null
+      );
+    }
+    const words = titleText.trim().split(/\s+/);
+    if (words.length > 2) {
+      const first = words.slice(0, words.length - 2).join(" ");
+      const accent = words.slice(words.length - 2).join(" ");
+      return React.createElement(React.Fragment, null,
+        first + " ",
+        React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, accent)
+      );
+    } else if (words.length === 2) {
+      return React.createElement(React.Fragment, null,
+        words[0] + " ",
+        React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, words[1])
+      );
+    }
+    return titleText;
+  }
+  return React.createElement(React.Fragment, null,
+    "Learn Conscious ",
+    React.createElement("em", { className: "italic c-title-accent", style: { color: "var(--driftwood)" } }, "Pet Grooming")
+  );
+}
 
 function CoursesHero() {
   const cms = (typeof useCmsContent === "function") ? useCmsContent("courses") : (window.PawpadContentStore ? window.PawpadContentStore.get("courses") : {});
   return React.createElement("section", { className: "c-hero" },
     React.createElement("div", { className: "container c-hero-grid" },
       React.createElement("div", null,
-        React.createElement("p", { className: "eyebrow reveal in" }, cms.eyebrow || "Pawpad courses"),
+        React.createElement("p", { className: "eyebrow reveal in" }, cms.eyebrow || "Professional Academy"),
         React.createElement("h1", { className: "h-display reveal in c-course-title", style: { marginTop: 24, maxWidth: "18ch" } },
-          cms.title ? cms.title : React.createElement(React.Fragment, null, "Become a Professional ", React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", whiteSpace: "nowrap" } }, "Pet Groomer"))
+          renderCoursesHeroTitle(cms)
         ),
         React.createElement("p", { className: "lead reveal in", style: { marginTop: 28, maxWidth: "58ch" } },
-          cms.lead || "A hands-on grooming course designed for animal lovers looking to build the skills, confidence, and practical experience needed to start a career in pet grooming."
-        ),
-        React.createElement("p", { className: "reveal in", style: { marginTop: 18, maxWidth: "62ch" } },
-          "Learn dog grooming, cat grooming, handling techniques, coat care, hygiene, safety, and business fundamentals through personalised training with experienced professionals."
+          cms.lead || "Understand dogs and cats in ways you have never thought of before as you learn the fine art of pet grooming through this structured and wholesome course. Your learning will take you through a journey of understanding the nervous system, musculoskeletal structure and emotional dynamics of the animal all of which are core essentials for ideal grooming."
         )
       ),
       React.createElement("div", { className: "c-hero-image reveal in" },
         React.createElement("img", {
-          src: cms.heroImage || "assets/img/pawpad/courses-cover-new.webp",
+          src: (cms.heroImage && !cms.heroImage.includes("courses-snapshot")) ? cms.heroImage : "assets/img/pawpad/courses-cover-new.webp",
           alt: "Pawpad grooming course",
           fetchpriority: "high",
-          decoding: "async"
+          decoding: "async",
+          onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/pawpad/courses-cover-new.webp"); }
         })
       )
     ),
@@ -115,6 +157,10 @@ function CoursesHero() {
       .c-hero-grid { display: grid; grid-template-columns: 1.05fr .9fr; gap: 64px; align-items: center; }
       .c-hero-image { background: transparent; }
       .c-hero-image img { width: 100%; height: auto; display: block; object-fit: contain; }
+      .c-course-title em, .c-course-title .c-title-accent {
+        color: var(--driftwood);
+        font-style: italic;
+      }
       @media (max-width: 900px) { .c-hero-grid { grid-template-columns: 1fr; gap: 34px; } .c-course-title em { white-space: normal !important; } }
     `)
   );
@@ -144,8 +190,11 @@ function CourseCards({ onBook }) {
       React.createElement(
         "div",
         { className: "cc-grid" },
-        list.map((c, i) =>
-          React.createElement(
+        list.map((c, i) => {
+          const knowMoreUrl = c.knowMoreUrl || (c.key === "pacgc" || (c.title && c.title.includes("Applied Canine")) ? "course_forms/pawpad-foundations-page.html" : "");
+          const enrollText = (c.enrollText && c.enrollText.includes("/")) ? "Book Now" : (c.enrollText || "Enroll Now");
+
+          return React.createElement(
             "article",
             { key: c.key || i, className: "cc-card reveal", style: { transitionDelay: `${i * 50}ms` } },
             c.img && React.createElement("div", { className: "cc-card-img-wrap", style: { marginBottom: "16px", borderRadius: "14px", overflow: "hidden" } },
@@ -161,10 +210,10 @@ function CourseCards({ onBook }) {
             React.createElement(
               "div",
               { className: "cc-card-actions" },
-              c.knowMoreUrl && React.createElement(
+              knowMoreUrl && React.createElement(
                 "a",
                 {
-                  href: c.knowMoreUrl,
+                  href: knowMoreUrl,
                   className: "btn-know-more"
                 },
                 "Know More"
@@ -175,12 +224,12 @@ function CourseCards({ onBook }) {
                   href: c.enrollUrl,
                   className: "btn-enroll-now"
                 },
-                c.enrollText || "Enroll Now ",
+                enrollText,
                 React.createElement("span", { className: "btn-arrow" }, " →")
               )
             )
-          )
-        )
+          );
+        })
       )
     ),
     React.createElement(
@@ -238,25 +287,33 @@ function CourseCards({ onBook }) {
         .cc-card-actions {
           display: flex;
           align-items: center;
-          gap: 12px;
+          gap: 10px;
           margin-top: auto;
-          flex-wrap: wrap;
+          width: 100%;
         }
-        .btn-know-more {
+        .btn-know-more,
+        .btn-enroll-now {
           font-family: var(--f-body);
           font-size: 13.5px;
           font-weight: 600;
-          padding: 10px 22px;
+          padding: 10px 14px;
           border-radius: 9999px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          white-space: nowrap;
+          text-decoration: none;
+          transition: all var(--t-fast) var(--ease);
+          flex: 1 1 0px;
+          min-width: 0;
+          box-sizing: border-box;
+        }
+        .btn-know-more {
           background: transparent;
           color: var(--ink);
           border: 1.5px solid color-mix(in oklab, var(--ink), transparent 70%);
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          text-decoration: none;
-          transition: all var(--t-fast) var(--ease);
         }
         .btn-know-more:hover {
           background: var(--champagne-soft);
@@ -275,35 +332,34 @@ function CourseCards({ onBook }) {
           text-decoration: none;
         }
         .btn-enroll-now {
-          font-family: var(--f-body);
-          font-size: 13.5px;
-          font-weight: 600;
-          padding: 10px 22px;
-          border-radius: 9999px;
           background: var(--ink);
           color: var(--white) !important;
           border: 1.5px solid var(--ink);
           cursor: pointer;
-          display: inline-flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          text-decoration: none;
-          transition: all var(--t-fast) var(--ease);
+          gap: 6px;
         }
         .btn-enroll-now:hover {
           background: var(--driftwood);
           border-color: var(--driftwood);
           color: var(--white) !important;
-          transform: translateX(2px);
+          transform: translateY(-1px);
           text-decoration: none;
         }
         .btn-arrow {
-          font-size: 15px;
+          font-size: 14px;
           transition: transform var(--t-fast) var(--ease);
         }
         .btn-enroll-now:hover .btn-arrow {
           transform: translateX(3px);
+        }
+        @media (max-width: 1200px) and (min-width: 981px) {
+          .cc-card { padding: 32px 22px 28px; }
+          .btn-know-more,
+          .btn-enroll-now {
+            padding: 10px 10px;
+            font-size: 12.5px;
+            gap: 4px;
+          }
         }
         @media (max-width: 980px) {
           .cc-grid { grid-template-columns: repeat(2, 1fr); }
@@ -311,8 +367,8 @@ function CourseCards({ onBook }) {
         @media (max-width: 640px) {
           .cc-grid { grid-template-columns: 1fr; }
           .cc-card { padding: 28px 22px 24px; }
-          .cc-card-actions { flex-direction: column; align-items: stretch; }
-          .btn-know-more, .btn-enroll-now { justify-content: center; text-align: center; }
+          .cc-card-actions { flex-direction: row; gap: 8px; }
+          .btn-know-more, .btn-enroll-now { padding: 10px 12px; font-size: 13px; }
         }
       `
     )

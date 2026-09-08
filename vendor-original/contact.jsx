@@ -76,6 +76,10 @@ function ContactPage({ onBook }) {
                   <a href="tel:+919663077496" className="cd-value-link cd-value-title">
                     9663077496
                   </a>
+                  <br />
+                  <a href="tel:+919148443330" className="cd-value-link cd-value-title" style={{ marginTop: 4 }}>
+                    9148443330
+                  </a>
                 </div>
               </div>
 

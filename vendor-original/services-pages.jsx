@@ -76,10 +76,7 @@ function CoursesHero() {
             Become a Professional <em className="italic" style={{ color: "var(--driftwood)", whiteSpace: "nowrap" }}>Pet Groomer</em>
           </h1>
           <p className="lead reveal in" style={{ marginTop: 28, maxWidth: "58ch" }}>
-            A hands-on grooming course designed for animal lovers looking to build the skills, confidence, and practical experience needed to start a career in pet grooming.
-          </p>
-          <p className="reveal in" style={{ marginTop: 18, maxWidth: "62ch" }}>
-            Learn dog grooming, cat grooming, handling techniques, coat care, hygiene, safety, and business fundamentals through personalised training with experienced professionals.
+            Understand dogs and cats in ways you have never thought of before as you learn the fine art of pet grooming through this structured and wholesome course. Your learning will take you through a journey of understanding the nervous system, musculoskeletal structure and emotional dynamics of the animal all of which are core essentials for ideal grooming.
           </p>
         </div>
         <div className="c-hero-image reveal in"><img src="assets/img/pawpad/courses-cover-new.webp" alt="Pawpad grooming course" fetchpriority="high" decoding="async" /></div>
@@ -1436,26 +1433,433 @@ function BoardingPage({ onBook, onAddToCart }) {
 
 function MyotherapyPage({ onBook }) {
   useReveal();
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("myotherapy") : (window.PawpadContentStore ? window.PawpadContentStore.get("myotherapy") : {});
+  const [formData, setFormData] = React.useState({ name: "", email: "", phone: "", petName: "", notes: "" });
+  const [status, setStatus] = React.useState("idle");
+  const [errorMessage, setErrorMessage] = React.useState("");
+
+  const emailTarget = cms.waitlistEmail || "info@pawpad.in";
+  const subjectTarget = cms.waitlistSubject || "Myotherapy Waitlist";
+  const mailtoUrl = `mailto:${encodeURIComponent(emailTarget)}?subject=${encodeURIComponent(subjectTarget)}`;
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emailTarget)}&su=${encodeURIComponent(subjectTarget)}`;
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!formData.name || !formData.email || !formData.phone) {
+      setStatus("error");
+      setErrorMessage("Please fill in your name, email, and phone number.");
+      return;
+    }
+    setStatus("submitting");
+    setErrorMessage("");
+
+    const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
+      ? cms.web3FormsAccessKey
+      : "YOUR_ACCESS_KEY_HERE";
+
+    try {
+      const payload = {
+        access_key: accessKey,
+        subject: subjectTarget,
+        from_name: "Pawpad Myotherapy Waitlist",
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        pet_details: formData.petName || "Not specified",
+        message: formData.notes || "None provided",
+        botcheck: ""
+      };
+
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setTimeout(() => {
+          setStatus("success");
+        }, 500);
+        return;
+      }
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage(data.message || "Unable to submit right now. Please email us directly.");
+      }
+    } catch (err) {
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage("Network error occurred. Please reach out to us at " + emailTarget + ".");
+      }
+    }
+  };
+
   return (
     <div className="page-enter">
-      <section className="soon-page">
-        <div className="container soon-grid">
-          <div>
-            <p className="eyebrow reveal in">Canine Myotherapy & Wellness</p>
-            <h1 className="h-display reveal in" style={{ marginTop: 24, maxWidth: "14ch" }}>Coming <em className="italic" style={{ color: "var(--driftwood)" }}>Soon</em></h1>
-            <p className="lead reveal in" style={{ marginTop: 28, maxWidth: "54ch" }}>Support for your dog's mobility, recovery, and overall wellbeing through gentle bodywork therapy is coming soon.</p>
-            <span className="btn btn-primary disabled-cta reveal in" style={{ marginTop: 32 }}>Coming Soon <Arrow /></span>
+      <section className="editorial-page">
+        <div className="container editorial-container">
+          <p className="editorial-eyebrow reveal in">{cms.eyebrow || "PAWPAD · MYOTHERAPY"}</p>
+          <h1 className="editorial-title reveal in">{cms.title || "Myotherapy – Coming Soon"}</h1>
+          <hr className="editorial-divider reveal in" />
+          <div className="editorial-content reveal in">
+            <p className="editorial-lead">
+              {cms.lead || "Ever noticed a subtle change in how your dog moves — a slight shift in gait, a new hesitation before jumping onto the couch or into the car, needing a boost for stairs they used to take without a second thought? A calm, quiet dog isn't always a relaxed one, either. Sometimes it's a dog who's learned to move less, because moving hurts — and it's easy to miss, especially in a dog you already think of as \"chilled\" or \"lazy.\""}
+            </p>
+            <p className="editorial-text">
+              {cms.body1 || "Myotherapy is gentle, hands-on bodywork for dogs — targeted massage and movement techniques that work with the whole body, not just wherever seems sore, to ease tension and support mobility. It's genuinely for every dog: keeping a dog feeling at their best, helping a puppy build good movement habits, supporting a senior through the slower years. But dogs with musculoskeletal issues — stiffness, old injuries, post-op recovery, arthritis, or a gait that just doesn't look quite right — are the ones who see the most benefit, often within just a few sessions."}
+            </p>
+            <p className="editorial-text">
+              {cms.body2Prefix !== undefined ? cms.body2Prefix : "Curious about the methodology? "}
+              <a
+                href={cms.linkUrl || "https://www.galenmyotherapy.com"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="editorial-link"
+              >
+                {cms.linkText || "Visit Galen Myotherapy"}
+              </a>
+              {cms.body2Suffix !== undefined ? cms.body2Suffix : ". Join the waitlist below to be the first to know when sessions open, or email us directly."}
+            </p>
+
+            <div className="myo-waitlist-box reveal in" id="waitlist">
+              <p className="myo-waitlist-eyebrow">{cms.waitlistEyebrow || "PRIORITY ACCESS"}</p>
+              <h2 className="myo-waitlist-title">{cms.waitlistTitle || "Join the Myotherapy Waitlist"}</h2>
+              <p className="myo-waitlist-sub">
+                {cms.waitlistSubtitle || "Be the first to know when appointments and consultation slots open. Leave your details below or write to us directly."}
+              </p>
+
+              {status === "success" ? (
+                <div className="myo-success-box">
+                  <div style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: 52, height: 52, borderRadius: "50%", background: "color-mix(in oklab, var(--champagne), transparent 30%)", color: "var(--driftwood-deep)", marginBottom: 16 }}>
+                    <PawIcon size={26} color="var(--driftwood)" />
+                  </div>
+                  <h3 style={{ fontFamily: "var(--f-display)", fontSize: 24, margin: "0 0 10px", color: "var(--ink)" }}>You're on the Waitlist!</h3>
+                  <p style={{ fontSize: 15, color: "var(--ink-soft)", margin: "0 0 20px", maxWidth: "48ch", marginLeft: "auto", marginRight: "auto" }}>
+                    Thank you, {formData.name || "friend"}! We have recorded your interest and will reach out to you at <strong>{formData.email}</strong> as soon as our canine myotherapy sessions open.
+                  </p>
+                  <button
+                    className="btn btn-outline btn-sm"
+                    onClick={() => {
+                      setFormData({ name: "", email: "", phone: "", petName: "", notes: "" });
+                      setStatus("idle");
+                    }}
+                  >
+                    Submit Another Entry
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="myo-waitlist-form">
+                  <div className="myo-form-grid">
+                    <div className="myo-field-group">
+                      <label className="myo-field-label">Your Name <span className="req">*</span></label>
+                      <input
+                        type="text"
+                        className="myo-input"
+                        required
+                        placeholder="e.g. Maya Rao"
+                        value={formData.name}
+                        onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      />
+                    </div>
+                    <div className="myo-field-group">
+                      <label className="myo-field-label">Email Address <span className="req">*</span></label>
+                      <input
+                        type="email"
+                        className="myo-input"
+                        required
+                        placeholder="e.g. maya@example.com"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="myo-form-grid">
+                    <div className="myo-field-group">
+                      <label className="myo-field-label">Phone Number <span className="req">*</span></label>
+                      <input
+                        type="tel"
+                        className="myo-input"
+                        required
+                        placeholder="e.g. +91 98765 43210"
+                        value={formData.phone}
+                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      />
+                    </div>
+                    <div className="myo-field-group">
+                      <label className="myo-field-label">Pet's Name & Breed / Age</label>
+                      <input
+                        type="text"
+                        className="myo-input"
+                        placeholder="e.g. Bella, 4 yr Indie / Golden"
+                        value={formData.petName}
+                        onChange={(e) => setFormData({ ...formData, petName: e.target.value })}
+                      />
+                    </div>
+                  </div>
+                  <div className="myo-field-group" style={{ marginBottom: 16 }}>
+                    <label className="myo-field-label">Mobility / Health Notes (Optional)</label>
+                    <textarea
+                      className="myo-textarea"
+                      placeholder="Tell us what you've noticed (e.g. stiffness, hesitation on stairs, recovery from surgery, arthritis, or general wellness)..."
+                      value={formData.notes}
+                      onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                    />
+                  </div>
+
+                  {errorMessage && <p style={{ color: "#c0392b", fontSize: 13, margin: "0 0 14px" }}>{errorMessage}</p>}
+
+                  <div className="myo-submit-row">
+                    <button
+                      type="submit"
+                      className="btn btn-primary"
+                      disabled={status === "submitting"}
+                    >
+                      {status === "submitting" ? "Joining Waitlist..." : "Join the Waitlist "}
+                      <Arrow size={13} />
+                    </button>
+                    <span style={{ fontSize: 12.5, color: "var(--ink-mute)" }}>
+                      We respect your privacy. No spam ever.
+                    </span>
+                  </div>
+                </form>
+              )}
+
+              <div className="myo-direct-email-card">
+                <p className="myo-direct-email-text">
+                  Prefer to email us directly? Write to <strong style={{ color: "var(--ink)" }}>{emailTarget}</strong> with the subject line <strong style={{ color: "var(--driftwood-deep)" }}>"{subjectTarget}"</strong>.
+                </p>
+                <div className="myo-email-links">
+                  <a href={mailtoUrl} className="myo-email-btn">
+                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <rect width={20} height={16} x={2} y={4} rx={2} />
+                      <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                    </svg>
+                    Email {emailTarget}
+                  </a>
+                  <a href={gmailUrl} target="_blank" rel="noopener noreferrer" className="myo-email-btn">
+                    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                      <polyline points="15 3 21 3 21 9" />
+                      <line x1={10} y1={14} x2={21} y2={3} />
+                    </svg>
+                    Open in Gmail Web
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <hr className="editorial-divider-sub" />
+            <p className="editorial-note">
+              {cms.note || "Pawpad · Details current as of this document's creation date."}
+            </p>
           </div>
-          <div className="soon-img reveal in"><div className="blob-2"><img src="assets/img/pawpad/myotherapy-page.png" alt="Canine myotherapy at Pawpad" /></div></div>
         </div>
-        <style>{`
-          .soon-page { padding: 180px 0 80px; }
-          .soon-grid { display: grid; grid-template-columns: 1.1fr 1fr; gap: 64px; align-items: center; }
-          .soon-img .blob-2 { aspect-ratio: 1/1; overflow: hidden; background: transparent; }
-          .soon-img img { width: 100%; height: 100%; object-fit: cover; }
-            @media (max-width: 900px) { .soon-grid { grid-template-columns: 1fr; gap: 36px; } }
-        `}</style>
       </section>
+      <style>{`
+        .editorial-page { padding: 180px 0 60px; }
+        .editorial-container { max-width: 820px; margin: 0 auto; }
+        .editorial-eyebrow {
+          font-family: var(--f-body);
+          font-size: 11.5px;
+          font-weight: 700;
+          letter-spacing: .2em;
+          text-transform: uppercase;
+          color: var(--driftwood);
+          margin: 0 0 20px;
+        }
+        .editorial-title {
+          font-family: var(--f-display);
+          font-size: clamp(38px, 4.5vw, 54px);
+          font-weight: 400;
+          line-height: 1.15;
+          color: var(--ink);
+          margin: 0 0 16px;
+        }
+        .editorial-divider {
+          border: none;
+          border-top: 1px solid color-mix(in oklab, var(--ink), transparent 86%);
+          margin: 28px 0 44px;
+        }
+        .editorial-divider-sub {
+          border: none;
+          border-top: 1px solid color-mix(in oklab, var(--ink), transparent 88%);
+          margin: 48px 0 24px;
+        }
+        .editorial-lead {
+          font-style: italic;
+          font-size: 16px;
+          line-height: 1.8;
+          color: var(--ink-soft);
+          margin: 0 0 28px;
+        }
+        .editorial-text {
+          font-size: 16px;
+          line-height: 1.8;
+          color: var(--ink-soft);
+          margin: 0 0 28px;
+        }
+        .editorial-link {
+          color: var(--driftwood);
+          text-decoration: underline;
+          text-underline-offset: 3px;
+          font-weight: 500;
+          transition: color var(--t-fast) var(--ease);
+        }
+        .editorial-link:hover {
+          color: var(--driftwood-deep);
+        }
+        .editorial-note {
+          font-style: italic;
+          font-size: 13.5px;
+          color: var(--ink-mute);
+          margin: 0 0 40px;
+          opacity: .9;
+        }
+
+        /* Myotherapy Waitlist Box Styles */
+        .myo-waitlist-box {
+          margin: 40px 0 36px;
+          background: color-mix(in oklab, var(--champagne), transparent 60%);
+          border: 1px solid color-mix(in oklab, var(--driftwood), transparent 75%);
+          border-radius: 24px;
+          padding: 40px 36px;
+          box-shadow: 0 12px 36px rgba(28,27,25,0.04);
+        }
+        .myo-waitlist-eyebrow {
+          font-family: var(--f-body);
+          font-size: 11px;
+          font-weight: 700;
+          letter-spacing: .2em;
+          text-transform: uppercase;
+          color: var(--driftwood);
+          margin: 0 0 10px;
+        }
+        .myo-waitlist-title {
+          font-family: var(--f-display);
+          font-size: clamp(24px, 3vw, 32px);
+          font-weight: 400;
+          line-height: 1.25;
+          color: var(--ink);
+          margin: 0 0 10px;
+        }
+        .myo-waitlist-sub {
+          font-size: 15px;
+          line-height: 1.6;
+          color: var(--ink-soft);
+          margin: 0 0 28px;
+        }
+        .myo-form-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 16px;
+          margin-bottom: 16px;
+        }
+        .myo-field-group {
+          display: flex;
+          flex-direction: column;
+          gap: 6px;
+        }
+        .myo-field-label {
+          font-size: 12.5px;
+          font-weight: 600;
+          color: var(--ink);
+        }
+        .myo-field-label span.req {
+          color: var(--driftwood-deep);
+          margin-left: 3px;
+        }
+        .myo-input, .myo-textarea {
+          width: 100%;
+          padding: 12px 14px;
+          border-radius: 12px;
+          border: 1px solid color-mix(in oklab, var(--ink), transparent 82%);
+          background: #ffffff;
+          color: var(--ink);
+          font-family: var(--f-body);
+          font-size: 14.5px;
+          transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+          outline: none;
+          box-sizing: border-box;
+        }
+        .myo-input:focus, .myo-textarea:focus {
+          border-color: var(--driftwood);
+          box-shadow: 0 0 0 3px color-mix(in oklab, var(--driftwood), transparent 85%);
+        }
+        .myo-textarea {
+          min-height: 85px;
+          resize: vertical;
+        }
+        .myo-submit-row {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          margin-top: 20px;
+          flex-wrap: wrap;
+        }
+        .myo-direct-email-card {
+          margin-top: 32px;
+          padding-top: 24px;
+          border-top: 1px solid color-mix(in oklab, var(--ink), transparent 88%);
+          display: flex;
+          flex-direction: column;
+          gap: 14px;
+        }
+        .myo-direct-email-text {
+          font-size: 14px;
+          line-height: 1.6;
+          color: var(--ink-soft);
+          margin: 0;
+        }
+        .myo-email-links {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12px;
+          align-items: center;
+        }
+        .myo-email-btn {
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          padding: 9px 18px;
+          border-radius: 999px;
+          background: color-mix(in oklab, var(--champagne), transparent 30%);
+          border: 1px solid color-mix(in oklab, var(--driftwood), transparent 65%);
+          color: var(--ink);
+          font-size: 13.5px;
+          font-weight: 500;
+          text-decoration: none;
+          transition: all var(--t-fast) var(--ease);
+        }
+        .myo-email-btn:hover {
+          background: var(--driftwood);
+          color: #ffffff;
+          border-color: var(--driftwood);
+          text-decoration: none;
+        }
+        .myo-success-box {
+          padding: 36px 24px;
+          background: #ffffff;
+          border-radius: 18px;
+          border: 1px solid color-mix(in oklab, var(--driftwood), transparent 70%);
+          text-align: center;
+        }
+
+        @media (max-width: 900px) {
+          .editorial-page { padding: 140px 0 40px; }
+          .editorial-container { max-width: 100%; }
+          .myo-waitlist-box { padding: 30px 20px; border-radius: 18px; }
+          .myo-form-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </div>
   );
 }

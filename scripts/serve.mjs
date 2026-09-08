@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..");
 const START_PORT = parseInt(process.env.PORT || "3000", 10);
+const MAX_BODY_SIZE = 25 * 1024 * 1024; // 25MB max payload to prevent DoS memory exhaustion
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -23,91 +24,202 @@ const MIME = {
   ".woff": "font/woff",
   ".ttf": "font/ttf",
   ".webmanifest": "application/manifest+json",
+  ".xml": "application/xml; charset=utf-8",
+  ".txt": "text/plain; charset=utf-8",
   ".pdf": "application/pdf"
 };
 
-function handleRequest(req, res) {
-  const parsedUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
-  const urlPath = decodeURIComponent(parsedUrl.pathname);
+const SECURITY_HEADERS = {
+  "X-Content-Type-Options": "nosniff",
+  "X-Frame-Options": "SAMEORIGIN",
+  "Referrer-Policy": "strict-origin-when-cross-origin"
+};
 
-  // API endpoint to list existing course forms and details pages
-  if (urlPath === "/api/list-forms" && req.method === "GET") {
-    try {
-      const formsDir = path.join(ROOT, "course_forms");
-      const files = fs.existsSync(formsDir) ? fs.readdirSync(formsDir).filter(f => f.endsWith(".html") || f.endsWith(".pdf")) : [];
-      res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-      res.end(JSON.stringify({ success: true, files }));
-      return;
-    } catch (err) {
-      res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-      res.end(JSON.stringify({ success: false, error: err.message }));
-      return;
-    }
-  }
+const SENSITIVE_PATTERNS = [
+  /(^|[/\\])\.[^/\\]/i,           // Hidden files (.git, .env, .DS_Store, etc.)
+  /(^|[/\\])node_modules([/\\]|$)/i, // node_modules
+  /(^|[/\\])package(-lock)?\.json$/i, // package.json, package-lock.json
+  /(^|[/\\])scripts([/\\]|$)/i,   // Backend / build scripts
+  /(^|[/\\])tests?([/\\]|$)/i,    // Test suites
+  /(^|[/\\])playwright\.config/i, // Test runner configs
+  /(^|[/\\])TODO\.md$/i
+];
 
-  // API endpoint to upload a new HTML / PDF form or syllabus file
-  if (urlPath === "/api/upload-form" && (req.method === "POST" || req.method === "OPTIONS")) {
-    if (req.method === "OPTIONS") {
-      res.writeHead(204, {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      });
-      res.end();
-      return;
-    }
-
+function readBody(req, res, maxBytes = MAX_BODY_SIZE) {
+  return new Promise((resolve, reject) => {
     let body = "";
-    req.on("data", (chunk) => { body += chunk; });
-    req.on("end", () => {
+    let received = 0;
+
+    req.on("data", (chunk) => {
+      received += chunk.length;
+      if (received > maxBytes) {
+        req.destroy();
+        res.writeHead(413, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          ...SECURITY_HEADERS
+        });
+        res.end(JSON.stringify({ success: false, error: "Payload Too Large. Limit is 25MB." }));
+        reject(new Error("PAYLOAD_TOO_LARGE"));
+        return;
+      }
+      body += chunk;
+    });
+
+    req.on("end", () => resolve(body));
+    req.on("error", (err) => {
+      if (!res.headersSent) {
+        res.writeHead(400, { "Content-Type": "application/json", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: "Bad Request Stream" }));
+      }
+      reject(err);
+    });
+  });
+}
+
+async function handleRequest(req, res) {
+  try {
+    const parsedUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
+    const rawPathname = decodeURIComponent(parsedUrl.pathname);
+
+    // API endpoint: list existing course forms and details pages
+    if (rawPathname === "/api/list-forms") {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          ...SECURITY_HEADERS
+        });
+        res.end();
+        return;
+      }
+      if (req.method !== "GET") {
+        res.writeHead(405, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: "Method Not Allowed" }));
+        return;
+      }
+      try {
+        const formsDir = path.join(ROOT, "course_forms");
+        const files = fs.existsSync(formsDir)
+          ? fs.readdirSync(formsDir).filter((f) => f.endsWith(".html") || f.endsWith(".pdf"))
+          : [];
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Access-Control-Allow-Origin": "*",
+          "Cache-Control": "no-cache",
+          ...SECURITY_HEADERS
+        });
+        res.end(JSON.stringify({ success: true, files }));
+        return;
+      } catch (err) {
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: "Internal Server Error" }));
+        return;
+      }
+    }
+
+    // API endpoint: upload a new HTML / PDF form or syllabus file
+    if (rawPathname === "/api/upload-form") {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          ...SECURITY_HEADERS
+        });
+        res.end();
+        return;
+      }
+      if (req.method !== "POST") {
+        res.writeHead(405, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: "Method Not Allowed" }));
+        return;
+      }
+
+      let body;
+      try {
+        body = await readBody(req, res);
+      } catch {
+        return;
+      }
+
       try {
         const data = JSON.parse(body);
+        if (!data || typeof data.content !== "string") {
+          res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: "Missing or invalid file content" }));
+          return;
+        }
+
         let rawName = path.basename(data.filename || "custom-form.html").replace(/[^a-zA-Z0-9_.-]/g, "-").toLowerCase();
         if (!rawName.endsWith(".html") && !rawName.endsWith(".pdf") && !rawName.endsWith(".htm")) {
           rawName += ".html";
         }
+
         const formsDir = path.join(ROOT, "course_forms");
         if (!fs.existsSync(formsDir)) {
           fs.mkdirSync(formsDir, { recursive: true });
         }
-        const targetPath = path.join(formsDir, rawName);
+        const targetPath = path.resolve(formsDir, rawName);
+        if (!targetPath.startsWith(formsDir)) {
+          res.writeHead(403, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: "Invalid file target path" }));
+          return;
+        }
+
         if (data.isBase64) {
           fs.writeFileSync(targetPath, Buffer.from(data.content, "base64"));
         } else {
           fs.writeFileSync(targetPath, data.content, "utf8");
         }
 
-        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
         res.end(JSON.stringify({
           success: true,
           filename: rawName,
           path: `course_forms/${rawName}`
         }));
       } catch (err) {
-        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-        res.end(JSON.stringify({ success: false, error: err.message }));
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: err.message || "Failed to save form" }));
       }
-    });
-    return;
-  }
-
-  // API endpoint to upload and save WebP images
-  if (urlPath === "/api/upload-image" && (req.method === "POST" || req.method === "OPTIONS")) {
-    if (req.method === "OPTIONS") {
-      res.writeHead(204, {
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Methods": "POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type"
-      });
-      res.end();
       return;
     }
 
-    let body = "";
-    req.on("data", (chunk) => { body += chunk; });
-    req.on("end", () => {
+    // API endpoint: upload and save WebP images
+    if (rawPathname === "/api/upload-image") {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          ...SECURITY_HEADERS
+        });
+        res.end();
+        return;
+      }
+      if (req.method !== "POST") {
+        res.writeHead(405, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: "Method Not Allowed" }));
+        return;
+      }
+
+      let body;
+      try {
+        body = await readBody(req, res);
+      } catch {
+        return;
+      }
+
       try {
         const data = JSON.parse(body);
+        if (!data || typeof data.content !== "string") {
+          res.writeHead(400, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: "Missing or invalid image content" }));
+          return;
+        }
+
         let rawName = path.basename(data.filename || "image.webp").replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_.-]/g, "-").toLowerCase();
         if (!rawName.endsWith(".webp")) {
           rawName += ".webp";
@@ -116,46 +228,94 @@ function handleRequest(req, res) {
         if (!fs.existsSync(imgDir)) {
           fs.mkdirSync(imgDir, { recursive: true });
         }
-        const targetPath = path.join(imgDir, rawName);
+        const targetPath = path.resolve(imgDir, rawName);
+        if (!targetPath.startsWith(imgDir)) {
+          res.writeHead(403, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: "Invalid image target path" }));
+          return;
+        }
+
         const base64Data = (data.content || "").replace(/^data:image\/\w+;base64,/, "");
         fs.writeFileSync(targetPath, Buffer.from(base64Data, "base64"));
 
-        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
+        res.writeHead(200, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
         res.end(JSON.stringify({
           success: true,
           filename: rawName,
           path: `assets/img/pawpad/${rawName}`
         }));
       } catch (err) {
-        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" });
-        res.end(JSON.stringify({ success: false, error: err.message }));
+        res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+        res.end(JSON.stringify({ success: false, error: err.message || "Failed to save image" }));
       }
+      return;
+    }
+
+    // Handle Static Files with Path Traversal Protection
+    if (req.method !== "GET" && req.method !== "HEAD") {
+      res.writeHead(405, { "Content-Type": "text/plain; charset=utf-8", ...SECURITY_HEADERS });
+      res.end("405 Method Not Allowed");
+      return;
+    }
+
+    // Normalize path and eliminate any traversal sequences
+    const safePath = path.normalize(rawPathname).replace(/^(\.\.[/\\])+/, "");
+    let resolvedPath = path.resolve(ROOT, "." + safePath);
+
+    // Strict boundary enforcement: resolved path must strictly start with ROOT
+    if (!resolvedPath.startsWith(ROOT)) {
+      res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8", ...SECURITY_HEADERS });
+      res.end("403 Forbidden");
+      return;
+    }
+
+    // Block sensitive files and directories
+    const relFromRoot = path.relative(ROOT, resolvedPath);
+    const isSensitive = SENSITIVE_PATTERNS.some((pattern) => pattern.test(safePath) || pattern.test(relFromRoot));
+    if (isSensitive) {
+      res.writeHead(403, { "Content-Type": "text/plain; charset=utf-8", ...SECURITY_HEADERS });
+      res.end("403 Forbidden");
+      return;
+    }
+
+    if (fs.existsSync(resolvedPath) && fs.statSync(resolvedPath).isDirectory()) {
+      resolvedPath = path.join(resolvedPath, "index.html");
+    } else if (!fs.existsSync(resolvedPath) && fs.existsSync(`${resolvedPath}.html`)) {
+      resolvedPath = `${resolvedPath}.html`;
+    }
+
+    if (!fs.existsSync(resolvedPath) || !fs.statSync(resolvedPath).isFile()) {
+      res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8", ...SECURITY_HEADERS });
+      res.end("404 Not Found");
+      return;
+    }
+
+    const ext = path.extname(resolvedPath).toLowerCase();
+    const contentType = MIME[ext] || "application/octet-stream";
+    const isHtml = ext === ".html";
+    const cacheControl = isHtml ? "no-cache" : "public, max-age=3600, stale-while-revalidate=86400";
+
+    const stat = fs.statSync(resolvedPath);
+    res.writeHead(200, {
+      "Content-Type": contentType,
+      "Content-Length": stat.size,
+      "Cache-Control": cacheControl,
+      "Access-Control-Allow-Origin": "*",
+      ...SECURITY_HEADERS
     });
-    return;
+
+    if (req.method === "HEAD") {
+      res.end();
+      return;
+    }
+
+    fs.createReadStream(resolvedPath).pipe(res);
+  } catch (err) {
+    if (!res.headersSent) {
+      res.writeHead(500, { "Content-Type": "text/plain; charset=utf-8", ...SECURITY_HEADERS });
+      res.end("500 Internal Server Error");
+    }
   }
-
-  let filePath = path.join(ROOT, urlPath === "/" ? "index.html" : urlPath);
-
-  if (fs.existsSync(filePath) && fs.statSync(filePath).isDirectory()) {
-    filePath = path.join(filePath, "index.html");
-  } else if (!fs.existsSync(filePath) && fs.existsSync(`${filePath}.html`)) {
-    filePath = `${filePath}.html`;
-  }
-
-  if (!fs.existsSync(filePath)) {
-    res.writeHead(404, { "Content-Type": "text/plain" });
-    res.end("404 Not Found");
-    return;
-  }
-
-  const ext = path.extname(filePath).toLowerCase();
-  const contentType = MIME[ext] || "application/octet-stream";
-
-  res.writeHead(200, {
-    "Content-Type": contentType,
-    "Access-Control-Allow-Origin": "*"
-  });
-  fs.createReadStream(filePath).pipe(res);
 }
 
 function listenOnPort(port) {

@@ -1373,7 +1373,12 @@
         React.createElement("img", {
           src: currentUrl,
           alt: "Preview",
-          style: { width: "38px", height: "38px", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--admin-border)" }
+          style: { width: "38px", height: "38px", objectFit: "cover", borderRadius: "6px", border: "1px solid var(--admin-border)" },
+          onError: (e) => {
+            e.target.onerror = null;
+            e.target.style.opacity = "0.4";
+            e.target.title = "Image could not be loaded from this path";
+          }
         }),
 
         // Hidden input & Button
@@ -3208,6 +3213,27 @@
               React.createElement("div", null, React.createElement("label", { style: { fontSize: "11px", color: "var(--admin-text-muted)" } }, "Link Suffix"), React.createElement("input", { className: "input-field", value: formData.body2Suffix !== undefined ? formData.body2Suffix : ". Join the waitlist to be the first to know when sessions open.", onChange: (e) => updateField("body2Suffix", e.target.value) }))
             ),
             React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Editorial Note / Footer Text"), React.createElement("input", { className: "input-field", value: formData.note || "Pawpad · Details current as of this document's creation date.", onChange: (e) => updateField("note", e.target.value) }))
+          ),
+
+          // 3. Waitlist & Web3Forms Settings
+          React.createElement(
+            "div",
+            { style: { display: "flex", flexDirection: "column", gap: "16px", background: "var(--admin-bg)", padding: "18px", borderRadius: "10px", border: "1px solid var(--admin-border-subtle)" } },
+            React.createElement("h4", { style: { color: "var(--admin-gold)", fontSize: "15px" } }, "3. Waitlist & Web3Forms Settings"),
+            React.createElement(
+              "div",
+              { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" } },
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Waitlist Card Eyebrow"), React.createElement("input", { className: "input-field", value: formData.waitlistEyebrow || "PRIORITY ACCESS", onChange: (e) => updateField("waitlistEyebrow", e.target.value) })),
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Waitlist Title"), React.createElement("input", { className: "input-field", value: formData.waitlistTitle || "Join the Myotherapy Waitlist", onChange: (e) => updateField("waitlistTitle", e.target.value) }))
+            ),
+            React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Waitlist Subtitle / Description"), React.createElement("textarea", { className: "input-field", style: { minHeight: "65px" }, value: formData.waitlistSubtitle || "Be the first to know when appointments and consultation slots open. Leave your details below or write to us directly.", onChange: (e) => updateField("waitlistSubtitle", e.target.value) })),
+            React.createElement(
+              "div",
+              { style: { display: "grid", gridTemplateColumns: "1.2fr 1fr 1fr", gap: "12px" } },
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Web3Forms Access Key"), React.createElement("input", { className: "input-field", placeholder: "e.g. YOUR_ACCESS_KEY_HERE", value: formData.web3FormsAccessKey || "", onChange: (e) => updateField("web3FormsAccessKey", e.target.value) })),
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Direct Email Target"), React.createElement("input", { className: "input-field", value: formData.waitlistEmail || "info@pawpad.in", onChange: (e) => updateField("waitlistEmail", e.target.value) })),
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "Email Subject Line"), React.createElement("input", { className: "input-field", value: formData.waitlistSubject || "Myotherapy Waitlist", onChange: (e) => updateField("waitlistSubject", e.target.value) }))
+            )
           )
         ),
 
@@ -3255,8 +3281,14 @@
               "div",
               { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "12px" } },
               React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "01 Email Address"), React.createElement("input", { className: "input-field", value: formData.email || "info@pawpad.in", onChange: (e) => updateField("email", e.target.value) })),
-              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone (Dial Digits)"), React.createElement("input", { className: "input-field", value: formData.phone || "9663077496", onChange: (e) => updateField("phone", e.target.value) })),
-              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone Display Format"), React.createElement("input", { className: "input-field", value: formData.phoneDisplay || "9663077496", onChange: (e) => updateField("phoneDisplay", e.target.value) }))
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone 1 (Dial Digits)"), React.createElement("input", { className: "input-field", value: formData.phone || "9663077496", onChange: (e) => updateField("phone", e.target.value) })),
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone 1 Display Format"), React.createElement("input", { className: "input-field", value: formData.phoneDisplay || "9663077496", onChange: (e) => updateField("phoneDisplay", e.target.value) }))
+            ),
+            React.createElement(
+              "div",
+              { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" } },
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone 2 (Dial Digits)"), React.createElement("input", { className: "input-field", value: formData.phone2 || "9148443330", onChange: (e) => updateField("phone2", e.target.value) })),
+              React.createElement("div", null, React.createElement("label", { style: { fontSize: "12px", color: "var(--admin-text-muted)" } }, "02 Phone 2 Display Format"), React.createElement("input", { className: "input-field", value: formData.phone2Display || "9148443330", onChange: (e) => updateField("phone2Display", e.target.value) }))
             ),
 
             // 03 Address
@@ -3362,14 +3394,38 @@
       processFile(file);
     };
 
-    const handleAssignSlot = () => {
+    const handleAssignSlot = async () => {
       if (!optimizedImage) return;
       const slot = imageSlots.find((s) => s.id === selectedSlot);
-      if (slot && window.PawpadContentStore) {
-        window.PawpadContentStore.updateField(slot.page, slot.field, optimizedImage.dataUrl);
-        setAssignNotice(`✓ Successfully applied WebP image to '${slot.label}'!`);
-        setTimeout(() => setAssignNotice(""), 4000);
+      if (!slot || !window.PawpadContentStore) return;
+
+      let imageTargetUrl = optimizedImage.dataUrl;
+
+      // Try uploading to server endpoint so it saves as a permanent .webp file
+      try {
+        const cleanBaseName = (optimizedImage.fileName || "pawpad-img").replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_.-]/g, "-").toLowerCase();
+        const webpFileName = `${cleanBaseName}-${Date.now().toString().slice(-4)}.webp`;
+        const resp = await fetch("/api/upload-image", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            filename: webpFileName,
+            content: optimizedImage.dataUrl
+          })
+        });
+        if (resp.ok) {
+          const resData = await resp.json();
+          if (resData && resData.success && resData.path) {
+            imageTargetUrl = resData.path;
+          }
+        }
+      } catch (e) {
+        console.warn("Could not save to server endpoint, saving to local content store:", e);
       }
+
+      window.PawpadContentStore.updateField(slot.page, slot.field, imageTargetUrl);
+      setAssignNotice(`✓ Successfully applied WebP image to '${slot.label}'!`);
+      setTimeout(() => setAssignNotice(""), 4000);
     };
 
     const handleDownloadWebp = () => {

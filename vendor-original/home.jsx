@@ -92,20 +92,27 @@ function Hero({ onBook }) {
           <p className="lead reveal in" style={{marginTop: 28}}>
             Calm, stress-free grooming, pet wellness therapy, boarding, and professional grooming courses — all designed with your pet's emotional wellbeing in mind.
           </p>
-          <p className="hero-sub reveal in" style={{marginTop: 18, maxWidth:"52ch"}}>
-            Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.
-          </p>
+          <p className="hero-sub reveal in" style={{ marginTop: 18, maxWidth: "48ch" }}>{cms.heroSub || "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike."}</p>
         </div>
         <div className="hero-image-wrap">
           <div className="hero-image blob-1" style={{ transform: `translateY(${par * -0.03}px) scale(1)` }}>
-            <img src="assets/img/pawpad/hero-cover-dog-cat.webp" alt="A dachshund dog and cat resting together with lilac flowers in a basket" />
+            <img
+              src={(cms.heroImage && !cms.heroImage.includes("hero-cover-dog-cat")) ? cms.heroImage : "assets/img/pawpad/hero-cover-bernese-cat.webp"}
+              alt="A Bernese Mountain Dog and fluffy cat resting together peacefully"
+              fetchpriority="high"
+              decoding="async"
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "assets/img/pawpad/hero-cover-bernese-cat.webp";
+              }}
+            />
           </div>
         </div>
       </div>
       <div className="container hero-stats reveal in">
-        <div><strong>10+</strong><span>years of conscious care</span></div>
-        <div><strong>4,200+</strong><span>tails wagged</span></div>
-        <div><strong>0</strong><span>sedation, ever</span></div>
+        {statsList.map((st, sidx) => (
+          <div key={sidx}><strong>{st.strong}</strong><span>{st.label}</span></div>
+        ))}
       </div>
       <style>{`
         .hero {
@@ -120,10 +127,10 @@ function Hero({ onBook }) {
         .paw-fl { position: absolute; transition: transform .15s linear; }
         .hero-grid {
           position: relative; z-index: 1;
-          display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr);
-          gap: clamp(16px, 2vw, 36px); align-items: center;
+          display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.32fr);
+          gap: clamp(18px, 2.5vw, 36px); align-items: center;
         }
-        .hero-text { position: relative; z-index: 2; max-width: 540px; }
+        .hero-text { position: relative; z-index: 2; max-width: 470px; }
         .eyebrow-pill {
           display: inline-flex; align-items: center; gap: 8px;
           font-family: var(--f-body); font-size: 12px; font-weight: 700;
@@ -133,8 +140,9 @@ function Hero({ onBook }) {
           border: 1px solid color-mix(in oklab, var(--driftwood), transparent 70%);
           padding: 8px 16px 8px 12px;
           border-radius: 999px;
+          white-space: nowrap;
         }
-        .hero-title { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 4.8vw, 70px); line-height: 1.02; letter-spacing: -.01em; color: var(--ink); margin: 0; }
+        .hero-title { font-family: var(--f-display); font-weight: 400; font-size: clamp(38px, 4.6vw, 68px); line-height: 1.04; letter-spacing: -.01em; color: var(--ink); margin: 0; }
         .hero-title-accent {
           background: linear-gradient(100deg, var(--driftwood) 0%, var(--driftwood-deep) 60%, var(--driftwood) 100%);
           -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -167,20 +175,20 @@ function Hero({ onBook }) {
           position: relative;
           display: flex;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: center;
           width: 100%;
         }
         .hero-image {
           position: relative;
           width: 100%;
-          max-width: clamp(520px, 54vw, 920px);
+          max-width: clamp(540px, 56vw, 920px);
           height: auto;
           overflow: visible;
           background: transparent;
           animation: none;
           z-index: 1;
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: center;
         }
         body[data-motion="still"] .hero-image { animation: none; }
@@ -189,11 +197,12 @@ function Hero({ onBook }) {
           max-width: 100%;
           height: auto;
           display: block;
-          filter: drop-shadow(0 20px 40px rgba(45, 30, 20, 0.09));
+          filter: drop-shadow(0 18px 36px rgba(45, 30, 20, 0.08));
           object-fit: contain;
           border-radius: 0;
           box-shadow: none;
           background: transparent;
+          transform: none;
         }
         @media (max-width: 900px) {
           .hero { padding: 110px 0 36px; min-height: 0; gap: 32px; }
@@ -212,6 +221,7 @@ function Hero({ onBook }) {
           }
           .hero-image-wrap { height: auto; margin-top: 8px; justify-content: center; }
           .hero-image { width: 100%; max-width: min(100%, 680px); right: auto; top: auto; bottom: auto; margin: 0 auto; justify-content: center; }
+          .hero-image img { transform: none; }
           .hero-stats { gap: 24px; }
           .hero-stats strong { font-size: 30px; }
         }
@@ -220,6 +230,7 @@ function Hero({ onBook }) {
           .hero .h-display span { display: inline; }
           .hero-image-wrap { max-width: 100%; }
           .hero-image { max-width: 100%; }
+          .hero-image img { transform: none; }
           .hero-cta { flex-direction: column; }
           .hero-cta .btn { width: 100%; justify-content: center; padding-inline: 16px; }
           .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }

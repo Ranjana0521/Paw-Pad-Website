@@ -1,7 +1,7 @@
 /**
  * Pawpad Forms Handler
  * Automatically binds to course application forms and standard forms,
- * persisting submissions into PawpadApplicationsStore and coordinating success redirects.
+ * persisting submissions into PawpadApplicationsStore and coordinating FormSubmit email delivery.
  */
 
 (function() {
@@ -15,6 +15,8 @@
       form.dataset.pawpadBound = "true";
 
       form.addEventListener("submit", function(e) {
+        e.preventDefault();
+
         // Extract course name from document title or h1
         const h1 = document.querySelector("h1");
         const eyebrow = document.querySelector(".eyebrow");
@@ -57,20 +59,54 @@
           acknowledgments: acks
         };
 
+        let createdId = "APP-" + Math.floor(100000 + Math.random() * 900000);
         if (window.PawpadApplicationsStore) {
           const created = window.PawpadApplicationsStore.submitApplication(appData);
-          console.log("Pawpad: Application captured successfully with ID:", created.id);
-          
-          // If the form points to Formsubmit or external service, we can allow graceful submission or show instant success
-          const nextInput = form.querySelector('input[name="_next"]');
-          if (nextInput && nextInput.value) {
-            // Let the form proceed to success.html or handle redirect
-            e.preventDefault();
-            const dest = nextInput.value.includes("?") 
-              ? `${nextInput.value}&app_id=${created.id}` 
-              : `${nextInput.value}?app_id=${created.id}`;
-            window.location.href = dest;
+          createdId = created ? created.id : createdId;
+          console.log("Pawpad: Application captured in local store with ID:", createdId);
+        }
+
+        // Visual feedback on submit button
+        const submitBtn = form.querySelector('button[type="submit"], input[type="submit"]');
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          if (submitBtn.tagName === "BUTTON") {
+            submitBtn.textContent = "Submitting Application...";
+          } else {
+            submitBtn.value = "Submitting Application...";
           }
+        }
+
+        const nextInput = form.querySelector('input[name="_next"]');
+        const nextTarget = (nextInput && nextInput.value) ? nextInput.value : "success.html";
+        const dest = nextTarget.includes("?") 
+          ? `${nextTarget}&app_id=${createdId}` 
+          : `${nextTarget}?app_id=${createdId}`;
+
+        const actionUrl = form.action || "https://formsubmit.co/courses@pawpad.in";
+        const isFormSubmit = actionUrl.includes("formsubmit.co");
+        const ajaxUrl = isFormSubmit && !actionUrl.includes("/ajax/")
+          ? actionUrl.replace("formsubmit.co/", "formsubmit.co/ajax/")
+          : actionUrl;
+
+        // If online and using FormSubmit or an external endpoint, submit via AJAX
+        if (ajaxUrl && !ajaxUrl.startsWith("#") && !ajaxUrl.startsWith("javascript:")) {
+          fetch(ajaxUrl, {
+            method: "POST",
+            headers: { "Accept": "application/json" },
+            body: formData
+          })
+          .then((res) => {
+            console.log("Pawpad: FormSubmit response status:", res.status);
+          })
+          .catch((err) => {
+            console.warn("Pawpad: External submission notice:", err);
+          })
+          .finally(() => {
+            window.location.href = dest;
+          });
+        } else {
+          window.location.href = dest;
         }
       });
     });

@@ -18,6 +18,7 @@ const Arrow = ({ size = 14 }) => /* @__PURE__ */ React.createElement("svg", { vi
 const InstagramIcon = ({ size = 16, color = "currentColor", style }) => /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", style, "aria-hidden": "true" }, /* @__PURE__ */ React.createElement("rect", { x: "2", y: "2", width: "20", height: "20", rx: "5", ry: "5" }), /* @__PURE__ */ React.createElement("path", { d: "M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" }), /* @__PURE__ */ React.createElement("line", { x1: "17.5", y1: "6.5", x2: "17.51", y2: "6.5" }));
 const FacebookIcon = ({ size = 16, color = "currentColor", style }) => /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: color, stroke: "none", style, "aria-hidden": "true" }, /* @__PURE__ */ React.createElement("path", { d: "M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" }));
 const TwitterIcon = ({ size = 16, color = "currentColor", style }) => /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: color, stroke: "none", style, "aria-hidden": "true" }, /* @__PURE__ */ React.createElement("path", { d: "M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" }));
+const CartIcon = ({ size = 18, color = "currentColor", style }) => /* @__PURE__ */ React.createElement("svg", { viewBox: "0 0 24 24", width: size, height: size, fill: "none", stroke: color, strokeWidth: "2", strokeLinecap: "round", strokeLinejoin: "round", style, "aria-hidden": "true" }, /* @__PURE__ */ React.createElement("circle", { cx: "9", cy: "21", r: "1" }), /* @__PURE__ */ React.createElement("circle", { cx: "20", cy: "21", r: "1" }), /* @__PURE__ */ React.createElement("path", { d: "M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" }));
 function useReveal() {
   useEffect(() => {
     const els = document.querySelectorAll(".reveal:not(.in)");
@@ -243,7 +244,7 @@ function Footer({ onBook }) {
           /* @__PURE__ */ React.createElement("div", null,
             /* @__PURE__ */ React.createElement("h4", { className: "f-h" }, "Address"),
             /* @__PURE__ */ React.createElement("p", null, "#426, 5th Main Road,", /* @__PURE__ */ React.createElement("br", null), "HRBR 2nd Block, Kalyan Nagar", /* @__PURE__ */ React.createElement("br", null), "Bangalore - 560043 India"),
-            /* @__PURE__ */ React.createElement("p", { style: { marginTop: 14 } }, "Ph: ", /* @__PURE__ */ React.createElement("a", { href: "tel:+919663077496" }, "9663077496")),
+            /* @__PURE__ */ React.createElement("p", { style: { marginTop: 14 } }, "Ph: ", /* @__PURE__ */ React.createElement("a", { href: "tel:+919663077496" }, "9663077496"), " / ", /* @__PURE__ */ React.createElement("a", { href: "tel:+919148443330" }, "9148443330")),
             /* @__PURE__ */ React.createElement("div", { className: "socials" },
               /* @__PURE__ */ React.createElement("a", { href: "https://www.instagram.com/pawpad_grooming_studio?igsi=MTRranltYzh1cnVuZw%3D%3D&utm_source=qr", "aria-label": "Instagram", target: "_blank", rel: "noopener noreferrer" }, /* @__PURE__ */ React.createElement(InstagramIcon, { size: 16 })),
               /* @__PURE__ */ React.createElement("a", { href: "https://www.facebook.com/share/19KxDx35E5/?mibextid=wwXIfr", "aria-label": "Facebook", target: "_blank", rel: "noopener noreferrer" }, /* @__PURE__ */ React.createElement(FacebookIcon, { size: 16 })),
@@ -490,9 +491,40 @@ function useCmsContent(pageKey, defaultData) {
   return content;
 }
 
+function handleImgError(e, fallback) {
+  if (!e || !e.target) return;
+  e.target.onerror = null;
+  if (fallback && e.target.src !== fallback) {
+    e.target.src = fallback;
+  }
+}
+
+function SafeImage({ src, fallback, alt = "", ...props }) {
+  const [imgSrc, setImgSrc] = useState(src || fallback);
+
+  useEffect(() => {
+    setImgSrc(src || fallback);
+  }, [src, fallback]);
+
+  return React.createElement("img", {
+    src: imgSrc || fallback,
+    alt,
+    onError: (e) => {
+      e.target.onerror = null;
+      if (fallback && imgSrc !== fallback) {
+        setImgSrc(fallback);
+      }
+    },
+    ...props
+  });
+}
+
 Object.assign(window, {
+  handleImgError,
+  SafeImage,
   PawIcon,
   Arrow,
+  CartIcon,
   InstagramIcon,
   FacebookIcon,
   TwitterIcon,

@@ -29,7 +29,7 @@
       heroTitleEnd: "in Bangalore",
       heroLead: "Calm, stress-free grooming, pet wellness therapy, boarding, and professional grooming courses — all designed with your pet's emotional wellbeing in mind.",
       heroSub: "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.",
-      heroImage: "assets/img/pawpad/hero-cover-dog-cat.webp",
+      heroImage: "assets/img/pawpad/hero-cover-bernese-cat.webp",
       stats: [
         { strong: "8+", label: "years of conscious care" },
         { strong: "4,200+", label: "tails wagged" },
@@ -221,7 +221,7 @@
           cat: "Puppy",
           key: "puppy-short",
           title: "Puppy Grooming | Short Hair",
-          sub: "Gentle introductions for puppies below 3 months",
+          sub: "Gentle introductions for puppies below 6 months",
           price: "₹1,000",
           priceNum: 1000,
           duration: "Gentle intro",
@@ -439,26 +439,14 @@
     courses: {
       eyebrow: "Professional Academy",
       title: "Learn Conscious Pet Grooming",
-      lead: "Small cohorts (max 3 students), intensive hands-on practice on live dogs and cats, stress-free handling methods, and business mentoring.",
-      heroImage: "assets/img/pawpad/courses-snapshot.webp",
+      title1: "Learn Conscious",
+      titleAccent: "Pet Grooming",
+      lead: "Understand dogs and cats in ways you have never thought of before as you learn the fine art of pet grooming through this structured and wholesome course. Your learning will take you through a journey of understanding the nervous system, musculoskeletal structure and emotional dynamics of the animal all of which are core essentials for ideal grooming.",
+      heroImage: "assets/img/pawpad/courses-cover-new.webp",
       depositNotice: "A non-refundable deposit is required upon acceptance to secure your slot in the cohort.",
       allowSubmissions: true,
       admissionsNote: "Applications are evaluated in the order received. We schedule an interview with eligible applicants before offering admission.",
       courseList: [
-        {
-          key: "pacgc",
-          cat: "Comprehensive Certification",
-          title: "Pawpad Applied Canine & Feline Grooming Certification (PACGC)",
-          price: "₹95,000",
-          priceNum: 95000,
-          deposit: "₹23,750",
-          duration: "7 weeks · 3 students max",
-          knowMoreUrl: "",
-          enrollUrl: "course_forms/pawpad-application-pacgc.html",
-          desc: "A 7-week comprehensive programme in conscious canine and feline grooming in Bengaluru. Small cohort of 3 students learning consent-based handling, anatomy, coat care, scissoring, and clipping without restraint.",
-          includes: ["Live dog and cat handling", "Force-free coat styling & scissoring", "Skin & dermatology fundamentals", "Salon ergonomics & safety", "Business launch mentorship"],
-          note: "Flagship practitioner certification for individuals looking to launch their own salon or lead conscious grooming practices."
-        },
         {
           key: "pcgec",
           cat: "Essentials",
@@ -472,20 +460,6 @@
           desc: "A fast, 5-day hands-on introduction to professional dog grooming for complete beginners. Work directly with live dogs from day one under expert supervision to learn bathing, drying, brushing, ear cleaning, and coat-care fundamentals.",
           includes: ["Bathing & coat preparation", "High-velocity drying techniques", "Nail clipping & paw hygiene", "Canine body language basics"],
           note: "Perfect for pet parents, rescue volunteers, and aspiring salon assistants."
-        },
-        {
-          key: "pcgpc",
-          cat: "Practitioner",
-          title: "Pawpad Canine Grooming Practitioner Certificate (PCGPC)",
-          price: "₹50,000",
-          priceNum: 50000,
-          deposit: "₹12,500",
-          duration: "3 weeks",
-          knowMoreUrl: "course_forms/pawpad-practitioner-dog-page.html",
-          enrollUrl: "course_forms/pawpad-application-pcgpc.html",
-          desc: "A 3-week practitioner-level programme designed to build industry-ready technical grounding in canine grooming. Master bathing and coat care, advance to live-dog nail trimming and hygiene clipping, and practice full scissoring techniques on training models.",
-          includes: ["Advanced clipping & blade selection", "Breed-specific head & body styling", "Handling nervous & senior dogs", "Hygiene trims & sanitary care"],
-          note: "Intensive training for professionals seeking fast-track employment in pet care facilities."
         },
         {
           key: "pfgec",
@@ -502,6 +476,20 @@
           note: "Dedicated strictly to feline physiology, hygiene routines, and emotional comfort."
         },
         {
+          key: "pcgpc",
+          cat: "Practitioner",
+          title: "Pawpad Canine Grooming Practitioner Certificate (PCGPC)",
+          price: "₹50,000",
+          priceNum: 50000,
+          deposit: "₹12,500",
+          duration: "3 weeks",
+          knowMoreUrl: "course_forms/pawpad-practitioner-dog-page.html",
+          enrollUrl: "course_forms/pawpad-application-pcgpc.html",
+          desc: "A 3-week practitioner-level programme designed to build industry-ready technical grounding in canine grooming. Master bathing and coat care, advance to live-dog nail trimming and hygiene clipping, and practice full scissoring techniques on training models.",
+          includes: ["Advanced clipping & blade selection", "Breed-specific head & body styling", "Handling nervous & senior dogs", "Hygiene trims & sanitary care"],
+          note: "Intensive training for professionals seeking fast-track employment in pet care facilities."
+        },
+        {
           key: "pfgpc",
           cat: "Practitioner",
           title: "Pawpad Feline Grooming Practitioner Certificate (PFGPC)",
@@ -516,18 +504,18 @@
           note: "One of India's few hands-on, live-cat conscious grooming practitioner certifications."
         },
         {
-          key: "foundations",
-          cat: "Foundations",
-          title: "Pawpad Foundations — Behaviour-Led Grooming for Beginners",
+          key: "pacgc",
+          cat: "Comprehensive Certification",
+          title: "Pawpad Applied Canine & Feline Grooming Certification (PACGC)",
           price: "₹95,000",
           priceNum: 95000,
           deposit: "₹23,750",
-          duration: "7 weeks",
+          duration: "7 weeks · 3 students max",
           knowMoreUrl: "course_forms/pawpad-foundations-page.html",
-          enrollUrl: "course_forms/pawpad-application-pfbgb.html",
-          desc: "A 7-week foundation-level grooming certification for complete beginners building toward a professional grooming career with both dogs and cats. Learn consent-based handling, anatomy, stress signals, bathing, coat care, scissoring, and clipping without restraint or force.",
-          includes: ["Canine & feline comparative handling", "Tool mastery & scissor sharpening", "De-shedding & coat restoration", "Client communication & ethics"],
-          note: "Comprehensive dual-species foundation for complete career changers."
+          enrollUrl: "course_forms/pawpad-application-pacgc.html",
+          desc: "A 7-week comprehensive programme in conscious canine and feline grooming in Bengaluru. Small cohort of 3 students learning consent-based handling, anatomy, coat care, scissoring, and clipping without restraint.",
+          includes: ["Live dog and cat handling", "Force-free coat styling & scissoring", "Skin & dermatology fundamentals", "Salon ergonomics & safety", "Business launch mentorship"],
+          note: "Flagship practitioner certification for individuals looking to launch their own salon or lead conscious grooming practices."
         },
         {
           key: "studio-consulting-online",
@@ -539,7 +527,7 @@
           duration: "2 Video Calls",
           knowMoreUrl: "course_forms/pawpad-studio-consulting-page.html",
           enrollUrl: "course_forms/pawpad-studio-consulting-page.html",
-          enrollText: "Enroll / Book Now",
+          enrollText: "Book Now",
           desc: "Two video calls plus a written equipment and space brief based on your floor plan or photos. Ideal for remote guidance on budgets, layout, and essential gear.",
           includes: ["2 comprehensive video consultation calls", "Customized equipment & space brief", "Floor plan & tool recommendations"],
           note: "Ideal for remote guidance on budgets, layout, and essential gear."
@@ -554,7 +542,7 @@
           duration: "Full Day On-Site",
           knowMoreUrl: "course_forms/pawpad-studio-consulting-page.html",
           enrollUrl: "course_forms/pawpad-studio-consulting-page.html",
-          enrollText: "Enroll / Book Now",
+          enrollText: "Book Now",
           desc: "A full day on-site assessing your actual space in person before providing customized equipment lists, space recommendations, and operational layout planning.",
           includes: ["Full-day in-person site assessment", "Customized equipment & supplier lists", "Acoustic, ventilation & layout blueprint"],
           note: "Hands-on site inspection and tailored spatial planning."
@@ -563,7 +551,7 @@
     },
     boarding: {
       eyebrow: "PAWPAD · BOARDING",
-      title: "Boarding, Reimagined",
+      title: "Boarding, ",
       sub: "Trial Day & Overnight Stay — What's Included",
       lead: "Home-like, un-caged environment with personalized feeding schedules, direct human observation, and zero-stress routines for small dogs.",
       heroImage: "assets/img/pawpad/boarding-sleeping-puppy-toy.webp",
@@ -664,7 +652,13 @@
       body2Prefix: "Curious about the methodology? ",
       linkText: "Visit Galen Myotherapy",
       linkUrl: "https://www.galenmyotherapy.com",
-      body2Suffix: ". Join the waitlist to be the first to know when sessions open.",
+      body2Suffix: ". Join the waitlist below to be the first to know when sessions open, or email us directly.",
+      waitlistEyebrow: "PRIORITY ACCESS",
+      waitlistTitle: "Join the Myotherapy Waitlist",
+      waitlistSubtitle: "Be the first to know when appointments and consultation slots open. Leave your details below or write to us directly.",
+      waitlistEmail: "info@pawpad.in",
+      waitlistSubject: "Myotherapy Waitlist",
+      web3FormsAccessKey: "YOUR_ACCESS_KEY_HERE",
       note: "Pawpad · Details current as of this document's creation date.",
       heroImage: "assets/img/pawpad/myotheraphy-snapshot.webp"
     },
@@ -681,6 +675,8 @@
       email: "info@pawpad.in",
       phone: "9663077496",
       phoneDisplay: "9663077496",
+      phone2: "9148443330",
+      phone2Display: "9148443330",
       addressLines: [
         "#426, 5th Main Road,",
         "HRBR 2nd Block, Kalyan Nagar",
@@ -727,9 +723,31 @@
         const saved = localStorage.getItem(STORAGE_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
+          if (parsed && parsed.home) {
+            if (!parsed.home.heroImage || parsed.home.heroImage.includes("hero-cover-dog-cat")) {
+              parsed.home.heroImage = "assets/img/pawpad/hero-cover-bernese-cat.webp";
+            }
+          }
+
+          if (parsed && parsed.boarding) {
+            if (parsed.boarding.title === "Boarding, Reimagined" || parsed.boarding.title === "Boarding, Reimagined ") {
+              parsed.boarding.title = "Boarding, ";
+            }
+          }
+
+          if (parsed && parsed.grooming && Array.isArray(parsed.grooming.packages)) {
+            parsed.grooming.packages.forEach(pkg => {
+              if (pkg && pkg.key === "puppy-short") {
+                if (!pkg.sub || pkg.sub.includes("3 months") || pkg.sub.includes("below 3 months")) {
+                  pkg.sub = "Gentle introductions for puppies below 6 months";
+                }
+              }
+            });
+          }
+
           if (parsed && parsed.courses && Array.isArray(parsed.courses.courseList)) {
             parsed.courses.courseList = parsed.courses.courseList.filter(
-              c => c && c.key !== "pgfc" && !(c.title && c.title.includes("Grooming Foundations Certificate (PGFC)"))
+              c => c && c.key !== "pgfc" && c.key !== "foundations" && !(c.title && (c.title.includes("Grooming Foundations Certificate (PGFC)") || c.title.includes("Pawpad Foundations")))
             );
 
             // If old generic 'consulting' exists, replace with Option 1 and Option 2
@@ -769,6 +787,14 @@
             }
 
             parsed.courses.courseList.forEach(course => {
+              if (course.key === "pacgc" || (course.title && course.title.includes("Applied Canine"))) {
+                course.knowMoreUrl = "course_forms/pawpad-foundations-page.html";
+              }
+              if (course.key === "studio-consulting-online" || course.key === "studio-consulting-in-person") {
+                if (!course.enrollText || course.enrollText.includes("/")) {
+                  course.enrollText = "Book Now";
+                }
+              }
               if (course.knowMoreUrl === "course_forms/pawpad-advanced-dog-page.html") {
                 course.knowMoreUrl = "";
               }
@@ -776,6 +802,24 @@
                 course.enrollUrl = "course_forms/pawpad-studio-consulting-page.html";
               }
             });
+
+            const targetOrder = ["pcgec", "pfgec", "pcgpc", "pfgpc", "pacgc", "studio-consulting-online", "studio-consulting-in-person"];
+            parsed.courses.courseList.sort((a, b) => {
+              const indexA = targetOrder.indexOf(a.key);
+              const indexB = targetOrder.indexOf(b.key);
+              if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+              if (indexA !== -1) return -1;
+              if (indexB !== -1) return 1;
+              return 0;
+            });
+
+            if (!parsed.courses.lead || parsed.courses.lead.includes("Small cohorts") || parsed.courses.lead.includes("max 3 students") || parsed.courses.lead.includes("A hands-on grooming course") || parsed.courses.lead.includes("stress-free handling methods")) {
+              parsed.courses.lead = DEFAULT_CONTENT.courses.lead;
+            }
+          } else if (parsed && parsed.courses) {
+            if (!parsed.courses.lead || parsed.courses.lead.includes("Small cohorts") || parsed.courses.lead.includes("max 3 students") || parsed.courses.lead.includes("A hands-on grooming course") || parsed.courses.lead.includes("stress-free handling methods")) {
+              parsed.courses.lead = DEFAULT_CONTENT.courses.lead;
+            }
           }
           return this._deepMerge(JSON.parse(JSON.stringify(DEFAULT_CONTENT)), parsed);
         }
@@ -791,6 +835,7 @@
         window.dispatchEvent(new CustomEvent("pawpad-content-updated", { detail: this.state }));
       } catch (err) {
         console.error("PawpadContentStore: failed to save to localStorage", err);
+        window.dispatchEvent(new CustomEvent("pawpad-content-updated", { detail: this.state }));
       }
     }
 
@@ -799,7 +844,14 @@
       for (const key of Object.keys(source)) {
         const val = source[key];
         if (val !== undefined && val !== null) {
-          if (typeof val === "object" && !Array.isArray(val)) {
+          if (typeof val === "string") {
+            const trimmed = val.trim();
+            const isImgKey = /(img|image|portrait|photo|cover|logo|icon)/i.test(key);
+            if (isImgKey && (!trimmed || trimmed.includes("hero-cover-dog-cat"))) {
+              continue;
+            }
+            target[key] = val;
+          } else if (typeof val === "object" && !Array.isArray(val)) {
             if (!target[key] || typeof target[key] !== "object" || Array.isArray(target[key])) {
               target[key] = {};
             }

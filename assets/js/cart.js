@@ -159,7 +159,7 @@ const CART_CATALOG = [
     category: "Grooming",
     price: 1000,
     priceDisplay: "₹1,000",
-    desc: "Gentle introductions for puppies below 3 months",
+    desc: "Gentle introductions for puppies below 6 months",
     requiresPetInfo: true,
     isDogOnly: true,
     petType: "Dog",
@@ -2043,33 +2043,11 @@ function CheckoutModal({ open, onClose }) {
   );
 }
 
-// Global Cart Icon SVG component
-const CartIcon = ({ size = 20, color = "currentColor", style }) =>
-  React.createElement(
-    "svg",
-    {
-      viewBox: "0 0 24 24",
-      width: size,
-      height: size,
-      fill: "none",
-      stroke: color,
-      strokeWidth: "2",
-      strokeLinecap: "round",
-      strokeLinejoin: "round",
-      style,
-      "aria-hidden": "true"
-    },
-    React.createElement("circle", { cx: "9", cy: "21", r: "1" }),
-    React.createElement("circle", { cx: "20", cy: "21", r: "1" }),
-    React.createElement("path", { d: "M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6" })
-  );
-
 // Expose on window
 Object.assign(window, {
   CART_CATALOG,
   PawpadCartStore,
   CartDrawer,
   CheckoutModal,
-  CartIcon,
   getRecommendedAdditions
 });

@@ -87,15 +87,19 @@ function Hero({ onBook }) {
           cms.heroTitleEnd || "in Bangalore"
         ),
         /* @__PURE__ */ React.createElement("p", { className: "lead reveal in", style: { marginTop: 28 } }, cms.heroLead || "Calm, stress-free grooming, pet wellness therapy, boarding, and professional grooming courses — all designed with your pet's emotional wellbeing in mind."),
-        /* @__PURE__ */ React.createElement("p", { className: "hero-sub reveal in", style: { marginTop: 18, maxWidth: "52ch" } }, cms.heroSub || "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.")
+        /* @__PURE__ */ React.createElement("p", { className: "hero-sub reveal in", style: { marginTop: 18, maxWidth: "48ch" } }, cms.heroSub || "Pawpad offers conscious pet grooming and wellness care designed around your pet's physical and emotional wellbeing. Instead of rushed grooming focused only on looks, we prioritise stress-free handling, coat health, skin care, and calm environments that support long-term comfort for dogs and cats alike.")
       ),
       /* @__PURE__ */ React.createElement("div", { className: "hero-image-wrap" },
         /* @__PURE__ */ React.createElement("div", { className: "hero-image blob-1", style: { transform: `translateY(${par * -0.03}px) scale(1)` } },
           /* @__PURE__ */ React.createElement("img", {
-            src: cms.heroImage || "assets/img/pawpad/hero-cover-dog-cat.webp",
-            alt: "A dachshund dog and cat resting together with lilac flowers in a basket",
+            src: (cms.heroImage && !cms.heroImage.includes("hero-cover-dog-cat")) ? cms.heroImage : "assets/img/pawpad/hero-cover-bernese-cat.webp",
+            alt: "A Bernese Mountain Dog and fluffy cat resting together peacefully",
             fetchpriority: "high",
-            decoding: "async"
+            decoding: "async",
+            onError: (e) => {
+              e.target.onerror = null;
+              e.target.src = "assets/img/pawpad/hero-cover-bernese-cat.webp";
+            }
           })
         )
       )
@@ -118,10 +122,10 @@ function Hero({ onBook }) {
         .paw-fl { position: absolute; transition: transform .15s linear; }
         .hero-grid {
           position: relative; z-index: 1;
-          display: grid; grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.18fr);
-          gap: clamp(16px, 2vw, 36px); align-items: center;
+          display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.32fr);
+          gap: clamp(18px, 2.5vw, 36px); align-items: center;
         }
-        .hero-text { position: relative; z-index: 2; max-width: 540px; }
+        .hero-text { position: relative; z-index: 2; max-width: 470px; }
         .eyebrow-pill {
           display: inline-flex; align-items: center; gap: 8px;
           font-family: var(--f-body); font-size: 12px; font-weight: 700;
@@ -131,8 +135,9 @@ function Hero({ onBook }) {
           border: 1px solid color-mix(in oklab, var(--driftwood), transparent 70%);
           padding: 8px 16px 8px 12px;
           border-radius: 999px;
+          white-space: nowrap;
         }
-        .hero-title { font-family: var(--f-display); font-weight: 400; font-size: clamp(36px, 4.8vw, 70px); line-height: 1.02; letter-spacing: -.01em; color: var(--ink); margin: 0; }
+        .hero-title { font-family: var(--f-display); font-weight: 400; font-size: clamp(38px, 4.6vw, 68px); line-height: 1.04; letter-spacing: -.01em; color: var(--ink); margin: 0; }
         .hero-title-accent {
           background: linear-gradient(100deg, var(--driftwood) 0%, var(--driftwood-deep) 60%, var(--driftwood) 100%);
           -webkit-background-clip: text; background-clip: text; color: transparent;
@@ -165,20 +170,20 @@ function Hero({ onBook }) {
           position: relative;
           display: flex;
           align-items: center;
-          justify-content: flex-end;
+          justify-content: center;
           width: 100%;
         }
         .hero-image {
           position: relative;
           width: 100%;
-          max-width: clamp(520px, 54vw, 920px);
+          max-width: clamp(540px, 56vw, 920px);
           height: auto;
           overflow: visible;
           background: transparent;
           animation: none;
           z-index: 1;
           display: flex;
-          justify-content: flex-end;
+          justify-content: center;
           align-items: center;
         }
         body[data-motion="still"] .hero-image { animation: none; }
@@ -187,11 +192,12 @@ function Hero({ onBook }) {
           max-width: 100%;
           height: auto;
           display: block;
-          filter: drop-shadow(0 20px 40px rgba(45, 30, 20, 0.09));
+          filter: drop-shadow(0 18px 36px rgba(45, 30, 20, 0.08));
           object-fit: contain;
           border-radius: 0;
           box-shadow: none;
           background: transparent;
+          transform: none;
         }
         @media (max-width: 900px) {
           .hero { padding: 110px 0 36px; min-height: 0; gap: 32px; }
@@ -210,6 +216,7 @@ function Hero({ onBook }) {
           }
           .hero-image-wrap { height: auto; margin-top: 8px; justify-content: center; }
           .hero-image { width: 100%; max-width: min(100%, 680px); right: auto; top: auto; bottom: auto; margin: 0 auto; justify-content: center; }
+          .hero-image img { transform: none; }
           .hero-stats { gap: 24px; }
           .hero-stats strong { font-size: 30px; }
         }
@@ -218,6 +225,7 @@ function Hero({ onBook }) {
           .hero .h-display span { display: inline; }
           .hero-image-wrap { max-width: 100%; }
           .hero-image { max-width: 100%; }
+          .hero-image img { transform: none; }
           .hero-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
           .hero-stats span { font-size: 10px; letter-spacing: .08em; }
         }
@@ -240,7 +248,7 @@ function ServiceCards({ navigate, onBook }) {
         onClick: () => setOpen(isOpen ? null : s.key),
         style: { transitionDelay: `${idx * 70}ms` }
       },
-      /* @__PURE__ */ React.createElement("div", { className: "svc-img" }, /* @__PURE__ */ React.createElement("img", { src: s.img, alt: s.title }), /* @__PURE__ */ React.createElement("span", { className: "svc-no" }, s.no)),
+      /* @__PURE__ */ React.createElement("div", { className: "svc-img" }, /* @__PURE__ */ React.createElement("img", { src: s.img, alt: s.title, onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/pawpad/grooming-snapshot-new.webp"); } }), /* @__PURE__ */ React.createElement("span", { className: "svc-no" }, s.no)),
       /* @__PURE__ */ React.createElement("div", { className: "svc-body" }, /* @__PURE__ */ React.createElement("h3", { className: "h-3" }, s.title), /* @__PURE__ */ React.createElement("p", { className: "svc-blurb" }, s.blurb), /* @__PURE__ */ React.createElement("div", { className: "svc-detail" }, /* @__PURE__ */ React.createElement("ul", { className: "svc-points" }, (Array.isArray(s.points) ? s.points : []).map((p) => /* @__PURE__ */ React.createElement("li", { key: p }, /* @__PURE__ */ React.createElement(PawIcon, { size: 11, color: "var(--driftwood)" }), " ", p))), /* @__PURE__ */ React.createElement("div", { className: "svc-foot" }, /* @__PURE__ */ React.createElement("span", { className: "svc-price" }, s.price), /* @__PURE__ */ React.createElement("div", { className: "svc-actions" }, s.key === "myotherapy" ? /* @__PURE__ */ React.createElement("span", { className: "svc-link disabled" }, s.cta) : /* @__PURE__ */ React.createElement("a", { href: hrefFor(s.target), className: "svc-link" }, s.cta, " ", /* @__PURE__ */ React.createElement(Arrow, { size: 12 }))))))
     );
   }))), /* @__PURE__ */ React.createElement("style", null, `
@@ -367,7 +375,7 @@ function StoryTease() {
     cardText: "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."
   };
 
-  return /* @__PURE__ */ React.createElement("section", { className: "story-tease" }, /* @__PURE__ */ React.createElement("div", { className: "container story-grid" }, /* @__PURE__ */ React.createElement("div", { className: "story-img-stack reveal" }, /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-1 blob-2" }, /* @__PURE__ */ React.createElement("img", { src: st.img1 || "assets/img/3.webp", alt: "A dog being gently held", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-2 blob-3" }, /* @__PURE__ */ React.createElement("img", { src: st.img2 || "assets/img/8.webp", alt: "A relaxed dog at rest", loading: "lazy", decoding: "async" })), /* @__PURE__ */ React.createElement("div", { className: "s-floating-card" }, /* @__PURE__ */ React.createElement("span", { className: "eyebrow" }, st.cardEyebrow || "In memory of"), /* @__PURE__ */ React.createElement("h4", { className: "h-3", style: { marginTop: 6 } }, (st.cardTitle || "Dew") + " ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", fontSize: ".75em" } }, st.cardSubtitle || "— Puchki —")), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, marginTop: 6, color: "var(--ink-mute)" } }, st.cardText || "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."))), /* @__PURE__ */ React.createElement("div", { className: "story-text reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, st.eyebrow || "Our story"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18 } }, (st.titleLine1 || '"I always wanted '), /* @__PURE__ */ React.createElement("br", null), (st.titleLine2 || "to work with animals"), /* @__PURE__ */ React.createElement("br", null), (st.titleLine3 || "I just took the long "), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, st.titleAccent || "way"), (st.titleEnd || ' to get here"')), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { marginTop: 28 } }, st.lead || "Pawpad started in 2017 in a small studio in Kalyan Nagar. Eight years on, it's still the same question we show up with every day: does this animal feel safe here?"), /* @__PURE__ */ React.createElement("p", { style: { marginTop: 16, maxWidth: "56ch" } }, st.paragraph || "From rescue work with Bengaluru's streeties to international certifications in feline grooming and canine skin care — every choice we make is rooted in patience and respect for what each animal is telling us."), /* @__PURE__ */ React.createElement("a", { href: hrefFor("about"), className: "btn btn-primary", style: { marginTop: 32 } }, (st.ctaText || "Read the full story") + " ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("style", null, `
+  return /* @__PURE__ */ React.createElement("section", { className: "story-tease" }, /* @__PURE__ */ React.createElement("div", { className: "container story-grid" }, /* @__PURE__ */ React.createElement("div", { className: "story-img-stack reveal" }, /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-1 blob-2" }, /* @__PURE__ */ React.createElement("img", { src: st.img1 || "assets/img/3.webp", alt: "A dog being gently held", loading: "lazy", decoding: "async", onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/3.webp"); } })), /* @__PURE__ */ React.createElement("div", { className: "s-img s-img-2 blob-3" }, /* @__PURE__ */ React.createElement("img", { src: st.img2 || "assets/img/8.webp", alt: "A relaxed dog at rest", loading: "lazy", decoding: "async", onError: (e) => { if (window.handleImgError) window.handleImgError(e, "assets/img/8.webp"); } })), /* @__PURE__ */ React.createElement("div", { className: "s-floating-card" }, /* @__PURE__ */ React.createElement("span", { className: "eyebrow" }, st.cardEyebrow || "In memory of"), /* @__PURE__ */ React.createElement("h4", { className: "h-3", style: { marginTop: 6 } }, (st.cardTitle || "Dew") + " ", /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)", fontSize: ".75em" } }, st.cardSubtitle || "— Puchki —")), /* @__PURE__ */ React.createElement("p", { style: { fontSize: 13, marginTop: 6, color: "var(--ink-mute)" } }, st.cardText || "Leena's Boxer, the heart dog whose unconditional trust shapes everything we do."))), /* @__PURE__ */ React.createElement("div", { className: "story-text reveal" }, /* @__PURE__ */ React.createElement("p", { className: "eyebrow" }, st.eyebrow || "Our story"), /* @__PURE__ */ React.createElement("h2", { className: "h-1", style: { marginTop: 18 } }, (st.titleLine1 || '"I always wanted '), /* @__PURE__ */ React.createElement("br", null), (st.titleLine2 || "to work with animals"), /* @__PURE__ */ React.createElement("br", null), (st.titleLine3 || "I just took the long "), /* @__PURE__ */ React.createElement("em", { className: "italic", style: { color: "var(--driftwood)" } }, st.titleAccent || "way"), (st.titleEnd || ' to get here"')), /* @__PURE__ */ React.createElement("p", { className: "lead", style: { marginTop: 28 } }, st.lead || "Pawpad started in 2017 in a small studio in Kalyan Nagar. Eight years on, it's still the same question we show up with every day: does this animal feel safe here?"), /* @__PURE__ */ React.createElement("p", { style: { marginTop: 16, maxWidth: "56ch" } }, st.paragraph || "From rescue work with Bengaluru's streeties to international certifications in feline grooming and canine skin care — every choice we make is rooted in patience and respect for what each animal is telling us."), /* @__PURE__ */ React.createElement("a", { href: hrefFor("about"), className: "btn btn-primary", style: { marginTop: 32 } }, (st.ctaText || "Read the full story") + " ", /* @__PURE__ */ React.createElement(Arrow, null)))), /* @__PURE__ */ React.createElement("style", null, `
         .story-tease { background: var(--champagne); }
         .story-grid {
           display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;

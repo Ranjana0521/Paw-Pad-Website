@@ -5,9 +5,12 @@
   "description": "Pawpad — static multi-page site (no build step required to deploy). scripts/build.mjs is an optional minification pass used by CI.",
   "scripts": {
     "build": "node scripts/build.mjs",
-    "serve": "node scripts/serve.mjs"
+    "serve": "node scripts/serve.mjs",
+    "test": "playwright test",
+    "test:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.62.1",
     "esbuild": "^0.23.0"
   }
 }
