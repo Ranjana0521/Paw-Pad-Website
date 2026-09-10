@@ -354,9 +354,9 @@ const TESTIMONIALS = [
     pet: "Long-time grooming client"
   },
   {
-    quote: "Theishing and Tamang did an excellent job during my large-breed Golden Retriever's grooming session. I've never seen my dog this comfortable with both the environment and the people. I highly recommend this place \u2014 they cared for my pet as if it were their own. The service exceeded my expectations and was worth every penny. Most importantly, my dog clearly enjoyed the experience.",
+    quote: "Took my four cats for a spa today and I'm really happy with the service! All of them came back looking clean, relaxed, and super happy. The staff was gentle and caring throughout. Special thanks to Leena for doing such a wonderful job she handled them with so much love and patience. Highly recommend this place for pet grooming!",
     name: "Karen Wilma",
-    pet: "Golden Retriever"
+    pet: "Cat grooming client"
   }
 ];
 function Testimonials() {

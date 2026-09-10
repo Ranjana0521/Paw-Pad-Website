@@ -255,7 +255,8 @@ function ServiceCards({ navigate, onBook }) {
             </h2>
           </div>
           <p className="lead" style={{maxWidth:"40ch"}}>
-            Each service is built on the same foundation — calm handling, physical comfort, and respect for what your pet is telling us. Tap or hover any card to look closer.
+            Each service is built on the same foundation — calm handling, physical comfort, and respect for what your pet is telling us.
+            <span className="italic" style={{display: "block", marginTop: "8px", fontSize: "14px"}}>Tap or hover any card to look closer.</span>
           </p>
         </div>
         <div className="services-grid">
