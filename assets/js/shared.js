@@ -355,7 +355,7 @@ const TESTIMONIALS = [
   },
   {
     quote: "Took my four cats for a spa today and I'm really happy with the service! All of them came back looking clean, relaxed, and super happy. The staff was gentle and caring throughout. Special thanks to Leena for doing such a wonderful job she handled them with so much love and patience. Highly recommend this place for pet grooming!",
-    name: "Karen Wilma",
+    name: "Lubna H.K",
     pet: "Cat grooming client"
   }
 ];
