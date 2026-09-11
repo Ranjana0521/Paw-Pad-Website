@@ -39,6 +39,7 @@ const SENSITIVE_PATTERNS = [
   /(^|[/\\])\.[^/\\]/i,           // Hidden files (.git, .env, .DS_Store, etc.)
   /(^|[/\\])node_modules([/\\]|$)/i, // node_modules
   /(^|[/\\])package(-lock)?\.json$/i, // package.json, package-lock.json
+  /(^|[/\\])admin-config\.json$/i, // Server admin credentials config
   /(^|[/\\])scripts([/\\]|$)/i,   // Backend / build scripts
   /(^|[/\\])tests?([/\\]|$)/i,    // Test suites
   /(^|[/\\])playwright\.config/i, // Test runner configs
@@ -81,6 +82,159 @@ async function handleRequest(req, res) {
   try {
     const parsedUrl = new URL(req.url, `http://${req.headers.host || "localhost"}`);
     const rawPathname = decodeURIComponent(parsedUrl.pathname);
+
+    // API endpoint: get / update server-side admin configuration (password, whitelist)
+    if (rawPathname === "/api/admin-config") {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          "Access-Control-Allow-Origin": "*",
+          "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+          "Access-Control-Allow-Headers": "Content-Type",
+          ...SECURITY_HEADERS
+        });
+        res.end();
+        return;
+      }
+
+      const configFile = path.join(ROOT, "admin-config.json");
+
+      if (req.method === "GET") {
+        try {
+          let currentConfig = {
+            primaryOwner: "pawpadpetstyles@gmail.com",
+            defaultPassword: "pawpad2017",
+            users: {
+              "pawpadpetstyles@gmail.com": { role: "owner" }
+            }
+          };
+
+          if (fs.existsSync(configFile)) {
+            try {
+              const raw = fs.readFileSync(configFile, "utf8");
+              const loaded = JSON.parse(raw);
+              if (loaded && typeof loaded === "object") {
+                currentConfig = {
+                  ...currentConfig,
+                  ...loaded,
+                  users: { ...currentConfig.users, ...(loaded.users || {}) }
+                };
+              }
+            } catch { }
+          }
+
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            ...SECURITY_HEADERS
+          });
+          res.end(JSON.stringify({ success: true, config: currentConfig }));
+          return;
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: "Failed to read server configuration" }));
+          return;
+        }
+      }
+
+      if (req.method === "POST") {
+        let body;
+        try {
+          body = await readBody(req, res);
+        } catch {
+          return;
+        }
+
+        try {
+          const updates = JSON.parse(body || "{}");
+          let currentConfig = {
+            primaryOwner: "pawpadpetstyles@gmail.com",
+            defaultPassword: "pawpad2017",
+            users: {
+              "pawpadpetstyles@gmail.com": { role: "owner" }
+            }
+          };
+
+          if (fs.existsSync(configFile)) {
+            try {
+              const loaded = JSON.parse(fs.readFileSync(configFile, "utf8")) || {};
+              currentConfig = {
+                ...currentConfig,
+                ...loaded,
+                users: { ...currentConfig.users, ...(loaded.users || {}) }
+              };
+            } catch { }
+          }
+
+          if (updates.primaryOwner && typeof updates.primaryOwner === "string") {
+            currentConfig.primaryOwner = updates.primaryOwner.trim().toLowerCase();
+          }
+
+          if (updates.defaultPassword && typeof updates.defaultPassword === "string") {
+            currentConfig.defaultPassword = updates.defaultPassword.trim();
+          }
+
+          // Full users object replacement/merge
+          if (updates.users && typeof updates.users === "object" && !Array.isArray(updates.users)) {
+            currentConfig.users = { ...currentConfig.users, ...updates.users };
+          }
+
+          // Update individual user's password
+          if (updates.userPassword && updates.userPassword.email && updates.userPassword.password) {
+            const email = updates.userPassword.email.trim().toLowerCase();
+            const pass = updates.userPassword.password.trim();
+            if (!currentConfig.users[email]) {
+              currentConfig.users[email] = { role: "admin" };
+            }
+            currentConfig.users[email].password = pass;
+            currentConfig.users[email].updatedAt = new Date().toISOString();
+          }
+
+          // Add a new user (starts with default password)
+          if (updates.addUser && updates.addUser.email) {
+            const email = updates.addUser.email.trim().toLowerCase();
+            if (!currentConfig.users[email]) {
+              currentConfig.users[email] = {
+                role: updates.addUser.role || "admin",
+                createdAt: new Date().toISOString()
+              };
+            }
+          }
+
+          // Remove a user
+          if (updates.removeUser && typeof updates.removeUser === "string") {
+            const email = updates.removeUser.trim().toLowerCase();
+            if (email !== currentConfig.primaryOwner.toLowerCase()) {
+              delete currentConfig.users[email];
+            }
+          }
+
+          currentConfig.updatedAt = new Date().toISOString();
+          fs.writeFileSync(configFile, JSON.stringify(currentConfig, null, 2), "utf8");
+
+          res.writeHead(200, {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
+            ...SECURITY_HEADERS
+          });
+          res.end(JSON.stringify({ success: true, message: "Configuration saved successfully", config: currentConfig }));
+          return;
+        } catch (err) {
+          res.writeHead(500, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+          res.end(JSON.stringify({ success: false, error: err.message || "Failed to update configuration" }));
+          return;
+        }
+      }
+
+      res.writeHead(405, { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*", ...SECURITY_HEADERS });
+      res.end(JSON.stringify({ success: false, error: "Method Not Allowed" }));
+      return;
+    }
 
     // API endpoint: list existing course forms and details pages
     if (rawPathname === "/api/list-forms") {

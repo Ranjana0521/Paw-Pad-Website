@@ -504,63 +504,221 @@ function StudentTestimonials() {
 }
 
 function CourseCTA({ onBook }) {
-  const [form, setForm] = useStateCourse({ name: "", email: "", phone: "" });
-  const [sent, setSent] = useStateCourse(false);
+  const cms = (typeof useCmsContent === "function") ? useCmsContent("courses") : (window.PawpadContentStore ? window.PawpadContentStore.get("courses") : {});
+  const courseList = (cms.courseList && Array.isArray(cms.courseList)) ? cms.courseList : COURSE_LIST;
+  const [form, setForm] = useStateCourse({ name: "", email: "", phone: "", course: "All Courses / General Enquiry" });
+  const [status, setStatus] = useStateCourse("idle");
+  const [errorMessage, setErrorMessage] = useStateCourse("");
+
   const upd = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
-  const handleSubmit = (e) => {
+
+  const emailTarget = cms.courseEnquiryEmail || "courses@pawpad.in";
+  const defaultSubject = cms.courseEnquirySubject || "Course Enquiry - Pawpad Academy";
+
+  // Access key check: check courses settings first, fallback to myotherapy or default placeholder
+  const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
+    ? cms.web3FormsAccessKey
+    : ((window.PawpadContentStore && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
+      ? window.PawpadContentStore.get("myotherapy").web3FormsAccessKey
+      : "YOUR_ACCESS_KEY_HERE");
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.email && !form.phone) return;
-    window.hsSubmit && window.hsSubmit("courses", form);
-    setSent(true);
+    if (!form.name || (!form.email && !form.phone)) {
+      setStatus("error");
+      setErrorMessage("Please fill in your name and at least an email or phone number.");
+      return;
+    }
+
+    setStatus("submitting");
+    setErrorMessage("");
+
+    try {
+      const selectedCourseName = form.course || "All Courses / General Enquiry";
+      const subject = (selectedCourseName && selectedCourseName !== "All Courses / General Enquiry")
+        ? `Course Enquiry: ${selectedCourseName}`
+        : defaultSubject;
+
+      const payload = {
+        access_key: accessKey,
+        subject: subject,
+        from_name: "Pawpad Academy - Course Enquiry",
+        name: form.name,
+        email: form.email || "Not provided",
+        phone: form.phone || "Not provided",
+        course_selected: selectedCourseName,
+        enquiry_type: "Professional Grooming Courses",
+        message: `Course Interested In: ${selectedCourseName}`,
+        botcheck: ""
+      };
+
+      if (window.hsSubmit) {
+        try { window.hsSubmit("courses", { ...form, course: selectedCourseName }); } catch (_) {}
+      }
+
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setTimeout(() => {
+          setStatus("success");
+        }, 500);
+        return;
+      }
+
+      const res = await fetch("https://api.web3forms.com/submit", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      if (data.success) {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage(data.message || "Unable to submit right now. Please email us directly at " + emailTarget);
+      }
+    } catch (err) {
+      if (accessKey === "YOUR_ACCESS_KEY_HERE") {
+        setStatus("success");
+      } else {
+        setStatus("error");
+        setErrorMessage("Network error occurred. Please reach out to us at " + emailTarget + ".");
+      }
+    }
   };
+
   return React.createElement("section", { className: "course-cta" },
     React.createElement("div", { className: "container" },
       React.createElement("div", { className: "course-cta-inner reveal" },
         React.createElement("div", null,
-          React.createElement("p", { className: "eyebrow" }, "Course Enquiry"),
-          React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "18ch" } }, "Ready to Start Your Grooming Journey?"),
-          React.createElement("p", { className: "lead", style: { marginTop: 24, maxWidth: "58ch" } }, "Courses run on a rolling basis throughout the year. Leave your details and we'll help you find the right start date for your training.")
+          React.createElement("p", { className: "eyebrow" }, cms.ctaEyebrow || "Course Enquiry"),
+          React.createElement("h2", { className: "h-1", style: { marginTop: 18, maxWidth: "18ch" } }, cms.ctaTitle || "Ready to Start Your Grooming Journey?"),
+          React.createElement("p", { className: "lead", style: { marginTop: 24, maxWidth: "58ch" } }, cms.ctaLead || "Courses run on a rolling basis throughout the year. Leave your details and we'll help you find the right start date for your training.")
         ),
-        sent ? React.createElement("div", { className: "course-form-sent" },
+        status === "success" ? React.createElement("div", { className: "course-form-sent" },
           React.createElement(window.PawIcon, { size: 44, color: "var(--driftwood)" }),
           React.createElement("h3", { className: "h-2", style: { margin: "16px 0 8px" } }, "We'll be in touch soon"),
-          React.createElement("p", { style: { margin: 0, color: "var(--ink-mute)", fontSize: 15, lineHeight: 1.6 } }, "The Pawpad team will reach out with course dates and batch availability.")
+          React.createElement("p", { style: { margin: "0 0 16px", color: "var(--ink-mute)", fontSize: 15, lineHeight: 1.6 } },
+            "Thank you, " + (form.name || "friend") + "! We have received your interest in " + (form.course || "our courses") + ". The Pawpad team will reach out with upcoming dates and batch availability."
+          ),
+          React.createElement("button", {
+            className: "btn btn-outline btn-sm",
+            style: { alignSelf: "flex-start", marginTop: "8px", fontSize: "13px" },
+            onClick: () => {
+              setForm({ name: "", email: "", phone: "", course: "All Courses / General Enquiry" });
+              setStatus("idle");
+            }
+          }, "Submit Another Enquiry")
         ) : React.createElement("form", { className: "course-form", onSubmit: handleSubmit },
           React.createElement("div", { className: "field" },
+            React.createElement("label", null, "Select Course"),
+            React.createElement("select", {
+              value: form.course,
+              onChange: upd("course")
+            },
+              React.createElement("option", { value: "All Courses / General Enquiry" }, "All Courses / General Enquiry"),
+              courseList.map((c, idx) =>
+                React.createElement("option", { key: c.key || idx, value: c.title }, c.title)
+              )
+            )
+          ),
+          React.createElement("div", { className: "field" },
             React.createElement("label", null, "Name"),
-            React.createElement("input", { value: form.name, onChange: upd("name"), placeholder: "Your name" })
+            React.createElement("input", { required: true, value: form.name, onChange: upd("name"), placeholder: "Your name" })
           ),
-          React.createElement("div", { className: "field" },
-            React.createElement("label", null, "Email"),
-            React.createElement("input", { type: "email", value: form.email, onChange: upd("email"), placeholder: "you@example.com" })
+          React.createElement("div", { className: "course-form-row" },
+            React.createElement("div", { className: "field" },
+              React.createElement("label", null, "Email"),
+              React.createElement("input", { type: "email", value: form.email, onChange: upd("email"), placeholder: "you@example.com" })
+            ),
+            React.createElement("div", { className: "field" },
+              React.createElement("label", null, "Phone"),
+              React.createElement("input", { type: "tel", value: form.phone, onChange: upd("phone"), placeholder: "96630 77496" })
+            )
           ),
-          React.createElement("div", { className: "field" },
-            React.createElement("label", null, "Phone"),
-            React.createElement("input", { type: "tel", value: form.phone, onChange: upd("phone"), placeholder: "96630 77496" })
-          ),
-          React.createElement("button", { className: "btn btn-primary", type: "submit" },
-            "Register interest ",
-            React.createElement(window.Arrow, null)
+          errorMessage && React.createElement("div", { className: "course-form-error" }, errorMessage),
+          React.createElement("button", {
+            className: "btn btn-primary",
+            type: "submit",
+            disabled: status === "submitting"
+          },
+            status === "submitting" ? "Registering interest..." : "Register interest ",
+            status !== "submitting" && React.createElement(window.Arrow, null)
           )
         )
       )
     ),
     React.createElement("style", null, `
-      .course-cta { background: var(--cream-bg); }
+      .course-cta { background: var(--cream-bg); padding: 40px 0 80px; }
       .course-cta-inner {
         padding: 48px;
         border-radius: 24px;
         background: var(--champagne-soft);
         border: 1px solid color-mix(in oklab, var(--ink), transparent 92%);
         display: grid;
-        grid-template-columns: 1fr minmax(280px, 420px);
-        gap: 42px;
+        grid-template-columns: 1.1fr minmax(320px, 460px);
+        gap: 48px;
         align-items: center;
+        box-sizing: border-box;
       }
-      .course-form { display: grid; gap: 16px; }
-      .course-form .btn { margin-top: 8px; justify-content: center; }
+      .course-form { display: flex; flex-direction: column; gap: 14px; width: 100%; }
+      .course-form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+      .course-form .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .course-form .field label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        color: var(--ink-mute);
+      }
+      .course-form input,
+      .course-form select {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12px 14px;
+        border-radius: 10px;
+        border: 1px solid color-mix(in oklab, var(--ink), transparent 80%);
+        background: var(--white);
+        font-family: var(--f-body, inherit);
+        font-size: 14px;
+        color: var(--ink);
+        transition: border-color var(--t-fast) var(--ease), box-shadow var(--t-fast) var(--ease);
+      }
+      .course-form select {
+        cursor: pointer;
+      }
+      .course-form input:focus,
+      .course-form select:focus {
+        outline: none;
+        border-color: var(--driftwood);
+        box-shadow: 0 0 0 3px color-mix(in oklab, var(--driftwood), transparent 80%);
+      }
+      .course-form-error {
+        color: #dc2626;
+        font-size: 13px;
+        line-height: 1.4;
+        background: rgba(220, 38, 38, 0.08);
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+      .course-form .btn { margin-top: 4px; justify-content: center; width: 100%; }
       .course-form-sent { display: flex; flex-direction: column; }
-      @media (max-width: 860px) { .course-cta-inner { grid-template-columns: 1fr; padding: 30px; } }
+      @media (max-width: 960px) {
+        .course-cta-inner { grid-template-columns: 1fr; padding: 36px 24px; gap: 32px; }
+      }
+      @media (max-width: 540px) {
+        .course-form-row { grid-template-columns: 1fr; gap: 14px; }
+        .course-cta-inner { padding: 28px 18px; }
+      }
     `)
   );
 }
