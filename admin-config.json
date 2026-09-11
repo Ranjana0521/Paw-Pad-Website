@@ -1,17 +1,11 @@
 {
-  "primaryOwner": "pawpadpetstyles@gmail.com",
-  "defaultPassword": "pawpad2017",
+  "primaryOwner": "pawpadpetstylist@gmail.com",
+  "defaultPassword": "2017",
   "users": {
-    "pawpadpetstyles@gmail.com": {
+    "pawpadpetstylist@gmail.com": {
       "role": "owner",
       "createdAt": "2026-09-11T00:00:00.000Z"
-    },
-    "sreejik006@gmail.com": {
-      "role": "admin",
-      "createdAt": "2026-09-11T16:21:08.071Z",
-      "password": "qwerty123",
-      "updatedAt": "2026-09-11T16:23:04.734Z"
     }
   },
-  "updatedAt": "2026-09-11T16:23:04.734Z"
+  "updatedAt": "2026-09-11T17:39:00.000Z"
 }

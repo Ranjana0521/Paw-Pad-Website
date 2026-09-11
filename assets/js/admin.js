@@ -11,46 +11,110 @@
 (function () {
   const { useState, useEffect, useRef, useMemo } = React;
 
-  const DEFAULT_WHITELIST = ["tharunsn04@gmail.com", "ranjanah0521@gmail.com", "test@test.com"];
-  const WHITELIST_STORAGE_KEY = "pawpad_admin_whitelist";
-  const GOOGLE_CLIENT_ID_KEY = "pawpad_admin_google_client_id";
-  const GOOGLE_CLIENT_ID = "1057951951261-m9vj6tc6lkbr68rg5nb91pjt2f5tqf25.apps.googleusercontent.com";
+  const PRIMARY_OWNER_EMAIL = "pawpadpetstylist@gmail.com";
+  const DEFAULT_INITIAL_PASSWORD = "2017";
+  const DEFAULT_USERS = {
+    "pawpadpetstylist@gmail.com": { role: "owner", createdAt: "2026-09-11T00:00:00.000Z" }
+  };
+  const USERS_STORAGE_KEY = "pawpad_admin_users_db";
   const AUTH_USER_STORAGE_KEY = "pawpad_admin_user";
   const AUTH_STORAGE_KEY = "pawpad_admin_auth_session";
 
-  // Helper: Retrieve whitelist
-  function getWhitelistedEmails() {
+  // Helper: Retrieve users map
+  function getAdminUsers() {
     try {
-      const stored = localStorage.getItem(WHITELIST_STORAGE_KEY);
+      const stored = localStorage.getItem(USERS_STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map(e => (typeof e === 'string' ? e.trim().toLowerCase() : '')).filter(Boolean);
+        if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
+          return { ...DEFAULT_USERS, ...parsed };
         }
       }
     } catch (e) { }
-    return DEFAULT_WHITELIST.map(e => e.toLowerCase());
+    return { ...DEFAULT_USERS };
+  }
+
+  // Helper: Save users map
+  function saveAdminUsers(usersMap) {
+    try {
+      localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(usersMap));
+    } catch (e) { }
+  }
+
+  // Helper: Retrieve whitelist (array of emails)
+  function getWhitelistedEmails() {
+    return Object.keys(getAdminUsers());
   }
 
   // Helper: Check authorization
-  function isEmailAuthorized(email) {
+  function isEmailAuthorized(email, directUsersMap = null) {
     if (!email) return false;
     const clean = email.trim().toLowerCase();
-    return getWhitelistedEmails().includes(clean);
+    const users = directUsersMap || getAdminUsers();
+    return Boolean(users[clean]);
   }
 
-  // Helper: Decode JWT
-  function parseJwt(token) {
-    try {
-      const base64Url = token.split('.')[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-      const jsonPayload = decodeURIComponent(atob(base64).split('').map(function (c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join(''));
-      return JSON.parse(jsonPayload);
-    } catch (e) {
-      return null;
+  // Helper: Check password for a specific user
+  function isPasswordValidForUser(email, enteredPassword, directUsersMap = null) {
+    if (!email || !enteredPassword) return false;
+    const cleanEmail = email.trim().toLowerCase();
+    const entered = enteredPassword.trim();
+    const users = directUsersMap || getAdminUsers();
+    const user = users[cleanEmail];
+    if (!user) return false;
+
+    // If the specific user has set their own personal custom password
+    if (user.password && typeof user.password === "string" && user.password.trim().length > 0) {
+      return user.password.trim() === entered;
     }
+
+    // If user has not changed password yet, strictly accept default setup password ('2017')
+    return entered === DEFAULT_INITIAL_PASSWORD;
+  }
+
+  // Helper: Fetch server config (for cross-device password/user sync)
+  async function syncServerAdminConfig() {
+    try {
+      const res = await fetch("/api/admin-config?_t=" + Date.now(), {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache", "Pragma": "no-cache" }
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.config) {
+          if (data.config.users && typeof data.config.users === "object") {
+            const merged = { ...DEFAULT_USERS, ...data.config.users };
+            saveAdminUsers(merged);
+            return data.config;
+          }
+        }
+      }
+    } catch (e) {
+      // Local fallback if running offline or without dev server
+    }
+    return null;
+  }
+
+  // Helper: Save config to server (persists across devices to admin-config.json)
+  async function saveServerAdminConfig(updates) {
+    try {
+      const res = await fetch("/api/admin-config", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.success && data.config && data.config.users) {
+          const merged = { ...DEFAULT_USERS, ...data.config.users };
+          saveAdminUsers(merged);
+          return true;
+        }
+      }
+    } catch (e) {
+      // Local storage fallback
+    }
+    return false;
   }
 
   // Icons Helper
@@ -64,7 +128,8 @@
     Close: () => React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("line", { x1: 18, y1: 6, x2: 6, y2: 18 }), React.createElement("line", { x1: 6, y1: 6, x2: 18, y2: 18 })),
     External: () => React.createElement("svg", { width: 14, height: 14, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" }), React.createElement("polyline", { points: "15 3 21 3 21 9" }), React.createElement("line", { x1: 10, y1: 14, x2: 21, y2: 3 })),
     Paw: () => React.createElement("svg", { viewBox: "0 0 64 64", width: 22, height: 22, fill: "var(--admin-gold)" }, React.createElement("ellipse", { cx: "32", cy: "16", rx: "5.5", ry: "7.5" }), React.createElement("ellipse", { cx: "20", cy: "24", rx: "6", ry: "8" }), React.createElement("ellipse", { cx: "44", cy: "24", rx: "6", ry: "8" }), React.createElement("ellipse", { cx: "11", cy: "38", rx: "5", ry: "6.5" }), React.createElement("ellipse", { cx: "53", cy: "38", rx: "5", ry: "6.5" }), React.createElement("ellipse", { cx: "32", cy: "46", rx: "13", ry: "11" })),
-    Google: () => React.createElement("svg", { width: 18, height: 18, viewBox: "0 0 24 24" }, React.createElement("path", { fill: "#EA4335", d: "M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.3l3.7 2.9C6.5 7.4 9 5 12 5z" }), React.createElement("path", { fill: "#4285F4", d: "M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.6h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.9z" }), React.createElement("path", { fill: "#FBBC05", d: "M5.6 14.8c-.2-.7-.4-1.5-.4-2.3 0-.8.2-1.6.4-2.3L1.9 7.3C.7 9.7 0 12.3 0 15.2s.7 5.5 1.9 7.9l3.7-2.9z" }), React.createElement("path", { fill: "#34A853", d: "M12 23.5c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2.4-6.4-5.2L1.9 16.5C3.7 20.2 7.5 23.5 12 23.5z" })),
+    Lock: () => React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("rect", { x: 3, y: 11, width: 18, height: 11, rx: 2, ry: 2 }), React.createElement("path", { d: "M7 11V7a5 5 0 0 1 10 0v4" })),
+    Key: () => React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M21 2l-2 2m-1.5 1.5L14 9l-3-3 2.5-2.5a4.95 4.95 0 1 0-7 7L13.5 17.5l2-2 1.5 1.5 3-3-1.5-1.5L21 10" })),
     Shield: () => React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" })),
     User: () => React.createElement("svg", { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("path", { d: "M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" }), React.createElement("circle", { cx: 12, cy: 7, r: "4" })),
     Sun: () => React.createElement("svg", { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("circle", { cx: 12, cy: 12, r: 5 }), React.createElement("line", { x1: 12, y1: 1, x2: 12, y2: 3 }), React.createElement("line", { x1: 12, y1: 21, x2: 12, y2: 23 }), React.createElement("line", { x1: 4.22, y1: 4.22, x2: 5.64, y2: 5.64 }), React.createElement("line", { x1: 18.36, y1: 18.36, x2: 19.78, y2: 19.78 }), React.createElement("line", { x1: 1, y1: 12, x2: 3, y2: 12 }), React.createElement("line", { x1: 21, y1: 12, x2: 23, y2: 12 }), React.createElement("line", { x1: 4.22, y1: 19.78, x2: 5.64, y2: 18.36 }), React.createElement("line", { x1: 18.36, y1: 5.64, x2: 19.78, y2: 4.22 })),
@@ -72,127 +137,68 @@
     Trash: () => React.createElement("svg", { width: 15, height: 15, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round" }, React.createElement("polyline", { points: "3 6 5 6 21 6" }), React.createElement("path", { d: "M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" }), React.createElement("line", { x1: "10", y1: "11", x2: "10", y2: "17" }), React.createElement("line", { x1: "14", y1: "11", x2: "14", y2: "17" }))
   };
 
-  // AUTHENTICATION GATE (GOOGLE OAUTH & WHITELIST + EMERGENCY PIN)
+  // AUTHENTICATION GATE (EMAIL & PASSWORD)
   function AuthGate({ onAuthenticated }) {
+    const [email, setEmail] = useState("");
+    const [password, setPassword] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState("");
-    const [gisLoaded, setGisLoaded] = useState(false);
-    const [showPinAuth, setShowPinAuth] = useState(false);
-    const [pinInput, setPinInput] = useState("");
-    const [pinEmail, setPinEmail] = useState("");
-    const googleBtnRef = useRef(null);
+    const [loading, setLoading] = useState(false);
 
-    const whitelist = useMemo(() => getWhitelistedEmails(), []);
-
-    const handleCredentialResponse = (response) => {
-      setError("");
-      if (!response || !response.credential) {
-        setError("No Google credential token received.");
-        return;
-      }
-      const payload = parseJwt(response.credential);
-      if (!payload || !payload.email) {
-        setError("Unable to read email from Google ID token.");
-        return;
-      }
-
-      const email = payload.email.toLowerCase();
-      if (isEmailAuthorized(email)) {
-        const userData = {
-          email: payload.email,
-          name: payload.name || email.split("@")[0],
-          picture: payload.picture || null,
-          authenticatedAt: new Date().toISOString()
-        };
-        localStorage.setItem(AUTH_STORAGE_KEY, "authenticated");
-        localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(userData));
-        onAuthenticated(userData);
-      } else {
-        setError(`Access Denied: (${payload.email}) is not authorized to access this administration console.`);
-      }
-    };
-
-    const handlePinSubmit = (e) => {
-      e.preventDefault();
-      setError("");
-      const cleanEmail = (pinEmail || "").trim().toLowerCase();
-      const enteredPin = (pinInput || "").trim();
-
-      if (!isEmailAuthorized(cleanEmail)) {
-        setError(`Email '${cleanEmail}' is not on the administrator whitelist.`);
-        return;
-      }
-
-      const validPins = ["2017", "pawpad2017", "admin2017"];
-      const customPin = localStorage.getItem("pawpad_admin_passcode");
-      if (customPin) validPins.push(customPin);
-
-      if (validPins.includes(enteredPin)) {
-        const userData = {
-          email: cleanEmail,
-          name: cleanEmail.split("@")[0],
-          picture: null,
-          authenticatedAt: new Date().toISOString(),
-          authMethod: "pin_passcode"
-        };
-        localStorage.setItem(AUTH_STORAGE_KEY, "authenticated");
-        localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(userData));
-        onAuthenticated(userData);
-      } else {
-        setError("Invalid administrator PIN or passcode.");
-      }
-    };
-
-    // Detect Google Identity Services library
     useEffect(() => {
-      let count = 0;
-      const checkGis = () => {
-        if (window.google?.accounts?.id) {
-          setGisLoaded(true);
-        } else if (count < 60) {
-          count++;
-          setTimeout(checkGis, 100);
-        }
-      };
-      checkGis();
+      syncServerAdminConfig();
     }, []);
 
-    // Render Google Sign In Button
-    useEffect(() => {
-      if (gisLoaded && googleBtnRef.current && window.google?.accounts?.id) {
-        try {
-          window.google.accounts.id.initialize({
-            client_id: GOOGLE_CLIENT_ID.trim(),
-            callback: handleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true
-          });
-          googleBtnRef.current.innerHTML = "";
-          window.google.accounts.id.renderButton(
-            googleBtnRef.current,
-            {
-              type: "standard",
-              theme: "filled_black",
-              size: "large",
-              shape: "pill",
-              text: "signin_with",
-              logo_alignment: "left",
-              width: 300
-            }
-          );
-        } catch (err) {
-          console.warn("GIS initialization notice:", err);
-        }
-      }
-    }, [gisLoaded]);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setError("");
+      const cleanEmail = (email || "").trim().toLowerCase();
+      const enteredPass = (password || "").trim();
 
-    const handleCustomGoogleClick = () => {
-      if (window.google?.accounts?.id) {
-        try {
-          window.google.accounts.id.prompt();
-        } catch (e) {
-          console.error(e);
-        }
+      if (!cleanEmail) {
+        setError("Please enter your administrator email.");
+        return;
       }
+
+      if (!enteredPass) {
+        setError("Please enter your password.");
+        return;
+      }
+
+      setLoading(true);
+
+      // Refresh server config to ensure latest cross-device password / whitelist is applied
+      const serverConfig = await syncServerAdminConfig();
+      const directUsers = (serverConfig && serverConfig.users) ? { ...DEFAULT_USERS, ...serverConfig.users } : null;
+
+      if (!isEmailAuthorized(cleanEmail, directUsers)) {
+        setLoading(false);
+        setError(`Access Denied: '${cleanEmail}' is not in the authorized administrator list.`);
+        return;
+      }
+
+      if (!isPasswordValidForUser(cleanEmail, enteredPass, directUsers)) {
+        setLoading(false);
+        setError("Invalid password. Please check your credentials and try again.");
+        return;
+      }
+
+      const users = directUsers || getAdminUsers();
+      const userObj = users[cleanEmail] || {};
+      const isOwner = cleanEmail === PRIMARY_OWNER_EMAIL.toLowerCase();
+
+      const userData = {
+        email: cleanEmail,
+        name: cleanEmail.split("@")[0],
+        role: isOwner ? "owner" : (userObj.role || "admin"),
+        picture: null,
+        authenticatedAt: new Date().toISOString(),
+        authMethod: "email_password"
+      };
+
+      localStorage.setItem(AUTH_STORAGE_KEY, "authenticated");
+      localStorage.setItem(AUTH_USER_STORAGE_KEY, JSON.stringify(userData));
+      onAuthenticated(userData);
     };
 
     return React.createElement(
@@ -212,10 +218,10 @@
         {
           className: "card",
           style: {
-            maxWidth: "440px",
+            maxWidth: "420px",
             width: "100%",
             textAlign: "center",
-            padding: "48px 36px",
+            padding: "44px 32px",
             boxShadow: "0 20px 50px rgba(46,46,46,0.08)",
             border: "1px solid var(--admin-border)",
             position: "relative"
@@ -223,7 +229,7 @@
         },
         React.createElement("div", { style: { display: "flex", justifyContent: "center", marginBottom: "16px" } }, React.createElement(Icons.Paw, null)),
         React.createElement("h1", { style: { fontFamily: "var(--font-display)", fontSize: "26px", color: "var(--admin-text)", marginBottom: "8px" } }, "Pawpad Admin Portal"),
-        React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "14px", marginBottom: "28px" } }, "Authorized staff only. Sign in to unlock management controls."),
+        React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "14px", marginBottom: "24px" } }, "Sign in with your email and password to access the administration dashboard."),
 
         // Error message
         error && React.createElement(
@@ -232,92 +238,78 @@
           "⚠️ ", error
         ),
 
-        // Primary Google Sign In
-        !showPinAuth && React.createElement(
-          "div",
-          { style: { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "50px", marginBottom: "12px" } },
-          React.createElement("div", { ref: googleBtnRef, style: { minHeight: "44px", display: "flex", justifyContent: "center" } }),
-          !gisLoaded && React.createElement(
-            "button",
-            {
-              type: "button",
-              onClick: handleCustomGoogleClick,
-              className: "btn-admin btn-admin-primary",
-              style: {
-                width: "280px",
-                padding: "12px 20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "12px",
-                fontSize: "14px",
-                borderRadius: "30px"
-              }
-            },
-            React.createElement(Icons.Google, null),
-            "Sign in with Google"
-          )
-        ),
-
-        // Fallback PIN / Passcode form
-        showPinAuth && React.createElement(
+        // Login Form
+        React.createElement(
           "form",
-          { onSubmit: handlePinSubmit, style: { display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" } },
-          React.createElement("div", null,
-            React.createElement("label", { style: { fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)" } }, "Staff Whitelist Email"),
+          { onSubmit: handleSubmit, style: { display: "flex", flexDirection: "column", gap: "16px", textAlign: "left" } },
+          React.createElement(
+            "div",
+            null,
+            React.createElement("label", { style: { display: "block", fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)", marginBottom: "6px" } }, "Email Address"),
             React.createElement("input", {
               type: "email",
               className: "input-field",
               required: true,
-              value: pinEmail,
-              onChange: (e) => setPinEmail(e.target.value),
-              placeholder: "Enter your email"
-            })
-          ),
-          React.createElement("div", null,
-            React.createElement("label", { style: { fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)" } }, "Admin PIN / Passcode"),
-            React.createElement("input", {
-              type: "password",
-              className: "input-field",
-              required: true,
-              value: pinInput,
-              onChange: (e) => setPinInput(e.target.value),
-              placeholder: "Enter 4-digit PIN"
+              autoFocus: true,
+              value: email,
+              onChange: (e) => setEmail(e.target.value),
+              placeholder: "e.g. admin@pawpad.in"
             })
           ),
           React.createElement(
+            "div",
+            null,
+            React.createElement("label", { style: { display: "block", fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)", marginBottom: "6px" } }, "Password"),
+            React.createElement(
+              "div",
+              { style: { position: "relative" } },
+              React.createElement("input", {
+                type: showPassword ? "text" : "password",
+                className: "input-field",
+                required: true,
+                value: password,
+                onChange: (e) => setPassword(e.target.value),
+                placeholder: "••••••••",
+                style: { paddingRight: "44px" }
+              }),
+              React.createElement(
+                "button",
+                {
+                  type: "button",
+                  onClick: () => setShowPassword(!showPassword),
+                  style: {
+                    position: "absolute",
+                    right: "10px",
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                    background: "none",
+                    border: "none",
+                    color: "var(--admin-text-muted)",
+                    cursor: "pointer",
+                    fontSize: "12px",
+                    padding: "4px"
+                  }
+                },
+                showPassword ? "Hide" : "Show"
+              )
+            )
+          ),
+          React.createElement(
             "button",
-            { type: "submit", className: "btn-admin btn-admin-primary", style: { marginTop: "6px" } },
-            "Authenticate with Passcode"
-          )
-        ),
-
-        // Toggle PIN / Google Auth
-        React.createElement(
-          "button",
-          {
-            type: "button",
-            onClick: () => {
-              setShowPinAuth(!showPinAuth);
-              setError("");
+            {
+              type: "submit",
+              disabled: loading,
+              className: "btn-admin btn-admin-primary",
+              style: { marginTop: "8px", width: "100%", padding: "12px", fontSize: "14px", fontWeight: "600", justifyContent: "center" }
             },
-            style: {
-              background: "none",
-              border: "none",
-              color: "var(--admin-gold)",
-              fontSize: "12.5px",
-              cursor: "pointer",
-              marginTop: "16px",
-              textDecoration: "underline"
-            }
-          },
-          showPinAuth ? "← Use Google Sign-In" : "Staff Passcode / Emergency Sign-In →"
+            loading ? "Signing in..." : "Sign In to Admin Portal"
+          )
         ),
 
         React.createElement(
           "div",
-          { style: { marginTop: "24px", paddingTop: "20px", borderTop: "1px solid var(--admin-border-subtle)", fontSize: "12px", color: "var(--admin-text-faint)" } },
-          "Protected by Google Identity Services & Strict Whitelist"
+          { style: { marginTop: "24px", paddingTop: "18px", borderTop: "1px solid var(--admin-border-subtle)", fontSize: "12px", color: "var(--admin-text-faint)" } },
+          "Authorized Staff & Admin Access"
         )
       )
     );
@@ -3586,33 +3578,79 @@
   // -------------------------------------------------------------
   // SYSTEM SETTINGS & BACKUPS TAB
   // -------------------------------------------------------------
-  function SettingsTab() {
-    const [whitelist, setWhitelist] = useState(() => getWhitelistedEmails());
+  function SettingsTab({ currentUser }) {
+    const [usersMap, setUsersMap] = useState(() => getAdminUsers());
     const [newEmail, setNewEmail] = useState("");
-    const [whitelistNotice, setWhitelistNotice] = useState("");
+    const [userNotice, setUserNotice] = useState("");
     const [backupNotice, setBackupNotice] = useState("");
+    const [newPassword, setNewPassword] = useState("");
+    const [confirmPassword, setConfirmPassword] = useState("");
+    const [passwordNotice, setPasswordNotice] = useState("");
     const [confirmModal, setConfirmModal] = useState({ isOpen: false });
     const importInputRef = useRef(null);
 
-    const handleAddEmail = (e) => {
+    const userEmail = (currentUser?.email || PRIMARY_OWNER_EMAIL).trim().toLowerCase();
+    const isPrimaryOwner = userEmail === PRIMARY_OWNER_EMAIL.toLowerCase();
+
+    useEffect(() => {
+      syncServerAdminConfig().then((cfg) => {
+        if (cfg && cfg.users) {
+          setUsersMap({ ...DEFAULT_USERS, ...cfg.users });
+        }
+      });
+    }, []);
+
+    const userList = useMemo(() => {
+      const all = Object.keys(usersMap).map((email) => {
+        const item = usersMap[email] || {};
+        const isOwner = email.toLowerCase() === PRIMARY_OWNER_EMAIL.toLowerCase();
+        return {
+          email,
+          role: isOwner ? "owner" : (item.role || "admin"),
+          hasCustomPass: Boolean(item.password),
+          createdAt: item.createdAt
+        };
+      });
+
+      // Primary Owner sees all admins; other admins only see the Primary Owner
+      if (isPrimaryOwner) {
+        return all;
+      }
+      return all.filter((u) => u.role === "owner" || u.email.toLowerCase() === PRIMARY_OWNER_EMAIL.toLowerCase());
+    }, [usersMap, isPrimaryOwner]);
+
+    const handleAddEmail = async (e) => {
       e.preventDefault();
-      const clean = newEmail.trim().toLowerCase();
-      if (!clean || !clean.includes("@")) return;
-      if (whitelist.includes(clean)) {
-        setWhitelistNotice("⚠️ Email is already in whitelist.");
+      if (!isPrimaryOwner) {
+        alert("Only the Primary Owner can add new administrators.");
         return;
       }
-      const updated = [...whitelist, clean];
-      localStorage.setItem(WHITELIST_STORAGE_KEY, JSON.stringify(updated));
-      setWhitelist(updated);
+      const clean = newEmail.trim().toLowerCase();
+      if (!clean || !clean.includes("@")) return;
+      if (usersMap[clean]) {
+        setUserNotice("⚠️ Email is already in the administrator list.");
+        return;
+      }
+      const updated = {
+        ...usersMap,
+        [clean]: { role: "admin", createdAt: new Date().toISOString() }
+      };
+      saveAdminUsers(updated);
+      setUsersMap(updated);
       setNewEmail("");
-      setWhitelistNotice("✓ Administrator email added to whitelist!");
-      setTimeout(() => setWhitelistNotice(""), 3500);
+      setUserNotice(`Saving '${clean}' to server...`);
+      await saveServerAdminConfig({ addUser: { email: clean, role: "admin" } });
+      setUserNotice(`✓ Administrator '${clean}' added! Initial password is '${DEFAULT_INITIAL_PASSWORD}'.`);
+      setTimeout(() => setUserNotice(""), 5000);
     };
 
     const handleRemoveEmail = (emailToRemove) => {
-      if (whitelist.length <= 1) {
-        alert("At least one administrator email must remain in the whitelist.");
+      if (!isPrimaryOwner) {
+        alert("Only the Primary Owner can remove administrators.");
+        return;
+      }
+      if (emailToRemove.toLowerCase() === PRIMARY_OWNER_EMAIL.toLowerCase()) {
+        alert("The Primary Owner account cannot be removed.");
         return;
       }
       setConfirmModal({
@@ -3622,13 +3660,58 @@
         confirmText: "Yes, Remove",
         cancelText: "No, Cancel",
         confirmStyle: "btn-admin-danger",
-        onConfirm: () => {
+        onConfirm: async () => {
           setConfirmModal({ isOpen: false });
-          const updated = whitelist.filter((e) => e !== emailToRemove);
-          localStorage.setItem(WHITELIST_STORAGE_KEY, JSON.stringify(updated));
-          setWhitelist(updated);
+          const updated = { ...usersMap };
+          delete updated[emailToRemove.toLowerCase()];
+          saveAdminUsers(updated);
+          setUsersMap(updated);
+          await saveServerAdminConfig({ removeUser: emailToRemove.toLowerCase() });
+          setUserNotice(`✓ ${emailToRemove} removed successfully.`);
+          setTimeout(() => setUserNotice(""), 3500);
         }
       });
+    };
+
+    const handleUpdatePassword = async (e) => {
+      e.preventDefault();
+      setPasswordNotice("");
+      const p1 = (newPassword || "").trim();
+      const p2 = (confirmPassword || "").trim();
+      if (!p1) {
+        setPasswordNotice("⚠️ Password cannot be empty.");
+        return;
+      }
+      if (p1.length < 4) {
+        setPasswordNotice("⚠️ Password must be at least 4 characters.");
+        return;
+      }
+      if (p1 !== p2) {
+        setPasswordNotice("⚠️ Passwords do not match.");
+        return;
+      }
+
+      setPasswordNotice("Saving and syncing password across devices...");
+      const updated = {
+        ...usersMap,
+        [userEmail]: {
+          ...(usersMap[userEmail] || { role: isPrimaryOwner ? "owner" : "admin" }),
+          password: p1,
+          updatedAt: new Date().toISOString()
+        }
+      };
+      saveAdminUsers(updated);
+      setUsersMap(updated);
+
+      const ok = await saveServerAdminConfig({ userPassword: { email: userEmail, password: p1 } });
+      setNewPassword("");
+      setConfirmPassword("");
+      if (ok) {
+        setPasswordNotice(`✓ Password for ${userEmail} updated and synced across all devices!`);
+      } else {
+        setPasswordNotice(`✓ Password for ${userEmail} updated locally.`);
+      }
+      setTimeout(() => setPasswordNotice(""), 5000);
     };
 
     const handleExportBackup = () => {
@@ -3686,27 +3769,38 @@
         onCancel: () => setConfirmModal({ isOpen: false })
       }),
 
-      // Google OAuth Email Whitelist
+      // Authorized Administrator Team (Owner Protected)
       React.createElement(
         "div",
         { className: "card" },
-        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" } },
-          React.createElement(Icons.Shield, null),
-          React.createElement("h3", { style: { fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--admin-gold)" } }, "Authorized Administrator Whitelist")
+        React.createElement("div", { style: { display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "10px", marginBottom: "8px" } },
+          React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            React.createElement(Icons.Shield, null),
+            React.createElement("h3", { style: { fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--admin-gold)" } }, "Authorized Administrator Team")
+          ),
+          isPrimaryOwner ? (
+            React.createElement("span", { className: "badge badge-approved", style: { fontSize: "11px" } }, "You are Primary Owner")
+          ) : (
+            React.createElement("span", { className: "badge", style: { fontSize: "11px", background: "var(--admin-card-hover)" } }, "🔒 Managed by Primary Owner")
+          )
         ),
-        React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "13px", marginBottom: "16px" } },
-          "Only users who sign in with these verified Google account email addresses can access the admin control center."
+        isPrimaryOwner ? React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "13px", marginBottom: "16px" } },
+          "Manage authorized staff logins. Newly added users start with the default setup password ('" + DEFAULT_INITIAL_PASSWORD + "') until they change it on their own."
+        ) : React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "13px", marginBottom: "16px" } },
+          "View authorized administrator team members."
         ),
 
-        // Email list
+        // Team list
         React.createElement(
           "div",
           { style: { display: "flex", flexDirection: "column", gap: "8px", marginBottom: "16px" } },
-          whitelist.map((email) =>
-            React.createElement(
+          userList.map((item) => {
+            const isOwner = item.role === "owner";
+            const isCurrent = item.email.toLowerCase() === userEmail;
+            return React.createElement(
               "div",
               {
-                key: email,
+                key: item.email,
                 style: {
                   display: "flex",
                   alignItems: "center",
@@ -3719,39 +3813,104 @@
               },
               React.createElement(
                 "div",
-                { style: { display: "flex", alignItems: "center", gap: "10px" } },
-                React.createElement(Icons.Google, null),
-                React.createElement("span", { style: { fontSize: "14px", fontWeight: "600", color: "var(--admin-text)" } }, email),
-                email === "tharunsn04@gmail.com" && React.createElement("span", { className: "badge badge-approved", style: { fontSize: "11px" } }, "Primary Owner")
+                { style: { display: "flex", alignItems: "center", gap: "10px", flexWrap: "wrap" } },
+                React.createElement(Icons.User, null),
+                React.createElement("span", { style: { fontSize: "14px", fontWeight: "600", color: "var(--admin-text)" } }, item.email),
+                isOwner ? (
+                  React.createElement("span", { className: "badge badge-approved", style: { fontSize: "11px" } }, "Primary Owner")
+                ) : (
+                  React.createElement("span", { className: "badge", style: { fontSize: "11px", background: "var(--admin-card-hover)" } }, "Administrator")
+                ),
+                isCurrent && React.createElement("span", { style: { fontSize: "11px", color: "var(--admin-gold)", fontWeight: "600" } }, "(You)"),
+                isPrimaryOwner && item.hasCustomPass && React.createElement(
+                  "span",
+                  { style: { fontSize: "11px", color: "var(--admin-success)" } },
+                  "• Personal Password Active"
+                )
               ),
-              whitelist.length > 1 && React.createElement(
+              isPrimaryOwner && !isOwner && React.createElement(
                 "button",
                 {
-                  onClick: () => handleRemoveEmail(email),
+                  onClick: () => handleRemoveEmail(item.email),
                   className: "btn-admin btn-admin-danger",
                   style: { padding: "4px 10px", fontSize: "12px" }
                 },
                 "Remove"
               )
-            )
-          )
+            );
+          })
         ),
 
-        // Add email form
+        // Add email form (Owner Only)
+        isPrimaryOwner ? (
+          React.createElement(
+            "form",
+            { onSubmit: handleAddEmail, style: { display: "flex", gap: "10px", alignItems: "center" } },
+            React.createElement("input", {
+              type: "email",
+              className: "input-field",
+              placeholder: "Add staff email (e.g. newstaff@pawpad.in)",
+              value: newEmail,
+              onChange: (e) => setNewEmail(e.target.value),
+              style: { flex: 1 }
+            }),
+            React.createElement("button", { type: "submit", className: "btn-admin btn-admin-primary" }, "Add Administrator")
+          )
+        ) : (
+          React.createElement(
+            "div",
+            { style: { padding: "10px 14px", background: "var(--admin-bg)", borderRadius: "6px", border: "1px solid var(--admin-border)", fontSize: "12px", color: "var(--admin-text-muted)" } },
+            "🔒 Only the Primary Owner (", PRIMARY_OWNER_EMAIL, ") can add or remove administrator accounts."
+          )
+        ),
+        userNotice && React.createElement("div", { style: { color: userNotice.startsWith("✓") ? "var(--admin-success)" : "var(--admin-danger)", fontSize: "13px", fontWeight: "600", marginTop: "8px" } }, userNotice)
+      ),
+
+      // My Account Password (Personal Password Update)
+      React.createElement(
+        "div",
+        { className: "card" },
+        React.createElement("div", { style: { display: "flex", alignItems: "center", gap: "8px", marginBottom: "8px" } },
+          React.createElement(Icons.Key, null),
+          React.createElement("h3", { style: { fontFamily: "var(--font-display)", fontSize: "18px", color: "var(--admin-gold)" } }, "My Account Password (" + userEmail + ")")
+        ),
+        React.createElement("p", { style: { color: "var(--admin-text-muted)", fontSize: "13px", marginBottom: "16px" } },
+          "Update your individual login password. This change only applies to your account without affecting other administrators."
+        ),
         React.createElement(
           "form",
-          { onSubmit: handleAddEmail, style: { display: "flex", gap: "10px", alignItems: "center" } },
-          React.createElement("input", {
-            type: "email",
-            className: "input-field",
-            placeholder: "Add staff email (e.g. staff@gmail.com)",
-            value: newEmail,
-            onChange: (e) => setNewEmail(e.target.value),
-            style: { flex: 1 }
-          }),
-          React.createElement("button", { type: "submit", className: "btn-admin btn-admin-primary" }, "Add to Whitelist")
-        ),
-        whitelistNotice && React.createElement("div", { style: { color: "var(--admin-success)", fontSize: "13px", fontWeight: "600", marginTop: "8px" } }, whitelistNotice)
+          { onSubmit: handleUpdatePassword, style: { display: "flex", flexDirection: "column", gap: "12px" } },
+          React.createElement(
+            "div",
+            { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" } },
+            React.createElement("div", null,
+              React.createElement("label", { style: { display: "block", fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)", marginBottom: "4px" } }, "New Password"),
+              React.createElement("input", {
+                type: "password",
+                className: "input-field",
+                placeholder: "Enter new password",
+                value: newPassword,
+                onChange: (e) => setNewPassword(e.target.value)
+              })
+            ),
+            React.createElement("div", null,
+              React.createElement("label", { style: { display: "block", fontSize: "12px", fontWeight: "600", color: "var(--admin-text-muted)", marginBottom: "4px" } }, "Confirm Password"),
+              React.createElement("input", {
+                type: "password",
+                className: "input-field",
+                placeholder: "Confirm new password",
+                value: confirmPassword,
+                onChange: (e) => setConfirmPassword(e.target.value)
+              })
+            )
+          ),
+          React.createElement(
+            "div",
+            { style: { display: "flex", alignItems: "center", gap: "12px", marginTop: "4px" } },
+            React.createElement("button", { type: "submit", className: "btn-admin btn-admin-primary" }, "Update My Password"),
+            passwordNotice && React.createElement("span", { style: { color: passwordNotice.startsWith("✓") ? "var(--admin-success)" : "var(--admin-danger)", fontSize: "13px", fontWeight: "600" } }, passwordNotice)
+          )
+        )
       ),
 
       // Backup & Restore
@@ -3799,10 +3958,12 @@
     const [currentUser, setCurrentUser] = useState(() => {
       try {
         const stored = localStorage.getItem(AUTH_USER_STORAGE_KEY);
-        return stored ? JSON.parse(stored) : { email: "tharunsn04@gmail.com", name: "Tharun", picture: null };
-      } catch (e) {
-        return { email: "tharunsn04@gmail.com", name: "Tharun", picture: null };
-      }
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && parsed.email) return parsed;
+        }
+      } catch (e) { }
+      return { email: PRIMARY_OWNER_EMAIL, name: "Admin", picture: null, role: "owner" };
     });
 
     const [activeTab, setActiveTab] = useState("dashboard");
@@ -3836,11 +3997,6 @@
       localStorage.removeItem(AUTH_STORAGE_KEY);
       localStorage.removeItem(AUTH_USER_STORAGE_KEY);
       sessionStorage.removeItem(AUTH_STORAGE_KEY);
-      if (window.google?.accounts?.id) {
-        try {
-          window.google.accounts.id.disableAutoSelect();
-        } catch (e) { }
-      }
       setIsAuthenticated(false);
       setCurrentUser(null);
     };
@@ -3917,7 +4073,7 @@
               "div",
               { style: { overflow: "hidden" } },
               React.createElement("div", { style: { fontSize: "13px", fontWeight: "600", color: "var(--admin-text)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" } }, currentUser?.name || "Admin User"),
-              React.createElement("div", { style: { fontSize: "11px", color: "var(--admin-gold)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" } }, currentUser?.email || "tharunsn04@gmail.com")
+              React.createElement("div", { style: { fontSize: "11px", color: "var(--admin-gold)", textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap" } }, currentUser?.email || PRIMARY_OWNER_EMAIL)
             )
           )
         ),
@@ -4007,7 +4163,7 @@
               activeTab === "applications" && "Review candidate responses and manage course approval lifecycle",
               activeTab === "content" && "Live updates to text, headlines, pricing, and packages",
               activeTab === "media" && "Automated compression to WebP and live asset slot replacement",
-              activeTab === "settings" && "Manage Google OAuth credentials, email whitelist, and export data backups"
+              activeTab === "settings" && "Manage administrator accounts, password settings, and export data backups"
             )
           ),
           React.createElement(
@@ -4045,7 +4201,7 @@
           activeTab === "applications" && React.createElement(ApplicationsTab, { applications, onUpdate: refreshData }),
           activeTab === "content" && React.createElement(ContentEditorTab, null),
           activeTab === "media" && React.createElement(MediaManagerTab, null),
-          activeTab === "settings" && React.createElement(SettingsTab, null)
+          activeTab === "settings" && React.createElement(SettingsTab, { currentUser })
         )
       )
     );

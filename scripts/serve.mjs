@@ -101,10 +101,10 @@ async function handleRequest(req, res) {
       if (req.method === "GET") {
         try {
           let currentConfig = {
-            primaryOwner: "pawpadpetstyles@gmail.com",
-            defaultPassword: "pawpad2017",
+            primaryOwner: "pawpadpetstylist@gmail.com",
+            defaultPassword: "2017",
             users: {
-              "pawpadpetstyles@gmail.com": { role: "owner" }
+              "pawpadpetstylist@gmail.com": { role: "owner" }
             }
           };
 
@@ -150,10 +150,10 @@ async function handleRequest(req, res) {
         try {
           const updates = JSON.parse(body || "{}");
           let currentConfig = {
-            primaryOwner: "pawpadpetstyles@gmail.com",
-            defaultPassword: "pawpad2017",
+            primaryOwner: "pawpadpetstylist@gmail.com",
+            defaultPassword: "2017",
             users: {
-              "pawpadpetstyles@gmail.com": { role: "owner" }
+              "pawpadpetstylist@gmail.com": { role: "owner" }
             }
           };
 
