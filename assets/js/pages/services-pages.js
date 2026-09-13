@@ -798,7 +798,7 @@ function MyotherapyPage({ onBook }) {
 
     const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
       ? cms.web3FormsAccessKey
-      : "YOUR_ACCESS_KEY_HERE";
+      : "ce70cafb-d84c-42f7-b57e-d320ff768866";
 
     try {
       const payload = {
@@ -820,13 +820,12 @@ function MyotherapyPage({ onBook }) {
         return;
       }
 
+      const fd = new FormData();
+      Object.keys(payload).forEach((k) => fd.append(k, payload[k]));
+
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(payload)
+        body: fd
       });
       const data = await res.json();
       if (data.success) {

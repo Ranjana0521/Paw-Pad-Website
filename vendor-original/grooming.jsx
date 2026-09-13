@@ -225,7 +225,6 @@ function GroomingHero({ onBook }) {
             Conscious pet grooming in Bangalore — built around coat health, hygiene, gentle handling, and emotional wellbeing. Every session is paced around your pet's comfort.
           </p>
           <div style={{display:"flex", gap:14, flexWrap:"wrap", marginTop:32}}>
-            <button className="btn btn-primary" onClick={onBook}>Book a grooming session <Arrow /></button>
             <a href="#packages" className="btn btn-ghost" onClick={(e) => { e.preventDefault(); document.getElementById("packages")?.scrollIntoView({behavior:"smooth"});}}>View packages <Arrow /></a>
           </div>
         </div>

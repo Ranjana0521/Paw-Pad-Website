@@ -520,7 +520,7 @@ function CourseCTA({ onBook }) {
     ? cms.web3FormsAccessKey
     : ((window.PawpadContentStore && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
       ? window.PawpadContentStore.get("myotherapy").web3FormsAccessKey
-      : "YOUR_ACCESS_KEY_HERE");
+      : "a9a21b4b-47ee-4889-b709-9f101c59874d");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -563,13 +563,12 @@ function CourseCTA({ onBook }) {
         return;
       }
 
+      const fd = new FormData();
+      Object.keys(payload).forEach((k) => fd.append(k, payload[k]));
+
       const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        },
-        body: JSON.stringify(payload)
+        body: fd
       });
       const data = await res.json();
       if (data.success) {

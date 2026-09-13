@@ -32,3 +32,9 @@ yarn-error.log*
 .env.local
 .env.*.local
 *.backup.json
+
+# Playwright
+test-results/
+playwright-report/
+blob-report/
+

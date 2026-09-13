@@ -40,9 +40,7 @@ Tracking against the 4-week plan agreed with Pawpad. Updated 12 Aug 2026.
       client wants some "Enquire"-priced services moved to fixed pricing for
       the Razorpay checkout — need the actual list (which services, what
       price) before Week 3's checkout can be built correctly.
-- [ ] **Web3Forms.** Needs an account + Access Key created for Pawpad before
-      `assets/js/hubspot.js` can be replaced. It's untouched and still live
-      for now so lead capture isn't broken in the meantime.
+- [x] **Web3Forms.** Access Key configured (`a9a21b4b-47ee-4889-b709-9f101c59874d`) across content store, waitlists, course applications, enquiries, and checkout forms.
 - [ ] **Razorpay Key ID.** Needed for the checkout build in Week 3.
 - [x] **Logo/favicon files.** Comprehensive favicon assets, SVG, Apple Touch Icons, Web App Manifest, and head links added across all pages.
 - [ ] **Instagram/Facebook URLs.** Footer icons are marked with a
@@ -55,7 +53,7 @@ Tracking against the 4-week plan agreed with Pawpad. Updated 12 Aug 2026.
 - [x] Full CSS/responsive fix pass & brand typography consistency
 - [x] Favicon/icon set generation & manifest integration
 - [x] WhatsApp floating click-to-chat widget across all pages (integrated in `assets/js/shared.js` & `page-shell.js` with WebP asset optimization)
-- [ ] Web3Forms integration replacing `assets/js/hubspot.js`
+- [x] Web3Forms integration across forms and lead dispatch (`assets/js/hubspot.js`, `assets/js/forms-handler.js`, `assets/js/pages/courses.js`, `assets/js/pages/services-pages.js`)
 - [x] Cart/checkout page and drawer with Razorpay links & full validation (`assets/js/cart.js`)
 - [ ] Security hardening: Cloudflare in front of GitHub Pages (headers/WAF/HTTPS)
 - [x] sitemap.xml, robots.txt, schema.org LocalBusiness markup

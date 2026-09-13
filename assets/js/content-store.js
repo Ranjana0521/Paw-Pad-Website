@@ -445,6 +445,7 @@
       heroImage: "assets/img/pawpad/courses-cover-new.webp",
       depositNotice: "A non-refundable deposit is required upon acceptance to secure your slot in the cohort.",
       allowSubmissions: true,
+      web3FormsAccessKey: "a9a21b4b-47ee-4889-b709-9f101c59874d",
       admissionsNote: "Applications are evaluated in the order received. We schedule an interview with eligible applicants before offering admission.",
       courseList: [
         {
@@ -658,7 +659,7 @@
       waitlistSubtitle: "Be the first to know when appointments and consultation slots open. Leave your details below or write to us directly.",
       waitlistEmail: "info@pawpad.in",
       waitlistSubject: "Myotherapy Waitlist",
-      web3FormsAccessKey: "YOUR_ACCESS_KEY_HERE",
+      web3FormsAccessKey: "ce70cafb-d84c-42f7-b57e-d320ff768866",
       note: "Pawpad · Details current as of this document's creation date.",
       heroImage: "assets/img/pawpad/myotheraphy-snapshot.webp"
     },
@@ -820,6 +821,13 @@
             if (!parsed.courses.lead || parsed.courses.lead.includes("Small cohorts") || parsed.courses.lead.includes("max 3 students") || parsed.courses.lead.includes("A hands-on grooming course") || parsed.courses.lead.includes("stress-free handling methods")) {
               parsed.courses.lead = DEFAULT_CONTENT.courses.lead;
             }
+          }
+
+          if (parsed && parsed.myotherapy && (parsed.myotherapy.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || !parsed.myotherapy.web3FormsAccessKey)) {
+            parsed.myotherapy.web3FormsAccessKey = "ce70cafb-d84c-42f7-b57e-d320ff768866";
+          }
+          if (parsed && parsed.courses && (parsed.courses.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || parsed.courses.web3FormsAccessKey === "ce70cafb-d84c-42f7-b57e-d320ff768866" || !parsed.courses.web3FormsAccessKey)) {
+            parsed.courses.web3FormsAccessKey = "a9a21b4b-47ee-4889-b709-9f101c59874d";
           }
           return this._deepMerge(JSON.parse(JSON.stringify(DEFAULT_CONTENT)), parsed);
         }

@@ -152,9 +152,9 @@
                 cms.cardDesc || "Sessions are spaced and never rushed. We plan around your pet's temperament, comfort and wellbeing."
               ),
               /* @__PURE__ */ React.createElement("div", { className: "card-actions" },
-                /* @__PURE__ */ React.createElement("button", {
-                  className: "btn btn-primary card-btn-book",
-                  onClick: () => onBook && onBook("grooming")
+                /* @__PURE__ */ React.createElement("a", {
+                  href: "grooming.html",
+                  className: "btn btn-primary card-btn-book"
                 }, (cms.cardBtnBook || "Book a session") + " ", /* @__PURE__ */ React.createElement(Arrow, { size: 14 })),
                 /* @__PURE__ */ React.createElement("a", {
                   href: `tel:${cms.cardCallPhone || "+919663077496"}`,

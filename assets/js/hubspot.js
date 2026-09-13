@@ -113,6 +113,7 @@
 
     fields.push(f('message', lines.join('\n')));
 
+    // 1. Submit to HubSpot
     fetch(
       'https://api.hsforms.com/submissions/v3/integration/submit/' + PORTAL + '/' + guid,
       {
@@ -124,6 +125,35 @@
         })
       }
     ).catch(function () { });
+
+    var web3Key = (window.PawpadContentStore && window.PawpadContentStore.get('courses') && window.PawpadContentStore.get('courses').web3FormsAccessKey)
+      ? window.PawpadContentStore.get('courses').web3FormsAccessKey
+      : 'a9a21b4b-47ee-4889-b709-9f101c59874d';
+    var web3Subject = (type === 'checkout')
+      ? 'New Booking / Order Request: ' + (data.orderId || 'Direct Checkout') + ' (' + (rawName || 'Customer') + ')'
+      : 'Pawpad Enquiry: ' + type.toUpperCase() + ' - ' + (rawName || 'Customer');
+
+    var web3Payload = {
+      access_key: web3Key,
+      subject: web3Subject,
+      from_name: 'Pawpad ' + type.charAt(0).toUpperCase() + type.slice(1) + ' Enquiry',
+      name: rawName || 'Not specified',
+      email: rawEmail || 'Not provided',
+      phone: rawPhone || 'Not provided',
+      enquiry_type: type,
+      details: lines.join('\n'),
+      botcheck: ''
+    };
+
+    var fd = new FormData();
+    Object.keys(web3Payload).forEach(function (k) { fd.append(k, web3Payload[k]); });
+
+    fetch('https://api.web3forms.com/submit', {
+      method: 'POST',
+      body: fd
+    }).catch(function (err) {
+      console.warn('Pawpad: Web3Forms submission notice:', err);
+    });
   };
 })();
 

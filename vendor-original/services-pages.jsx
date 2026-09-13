@@ -1455,7 +1455,7 @@ function MyotherapyPage({ onBook }) {
 
     const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
       ? cms.web3FormsAccessKey
-      : "YOUR_ACCESS_KEY_HERE";
+      : "ce70cafb-d84c-42f7-b57e-d320ff768866";
 
     try {
       const payload = {

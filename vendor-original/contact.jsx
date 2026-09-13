@@ -123,12 +123,12 @@ function ContactPage({ onBook }) {
                 Sessions are spaced and never rushed. We plan around your pet's temperament, comfort and wellbeing.
               </p>
               <div className="card-actions">
-                <button
+                <a
+                  href="grooming.html"
                   className="btn btn-primary card-btn-book"
-                  onClick={() => onBook && onBook("grooming")}
                 >
                   Book a session <Arrow size={14} />
-                </button>
+                </a>
                 <a href="tel:+919663077496" className="btn btn-secondary card-btn-call">
                   Call us
                 </a>
