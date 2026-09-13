@@ -83,8 +83,9 @@
           ? `${nextTarget}&app_id=${createdId}` 
           : `${nextTarget}?app_id=${createdId}`;
 
-        const web3Key = (window.PawpadContentStore && window.PawpadContentStore.get("courses")?.web3FormsAccessKey) 
-          ? window.PawpadContentStore.get("courses").web3FormsAccessKey 
+        const storeCoursesKey = window.PawpadContentStore && window.PawpadContentStore.get("courses")?.web3FormsAccessKey;
+        const web3Key = (storeCoursesKey && storeCoursesKey !== "YOUR_ACCESS_KEY_HERE" && storeCoursesKey !== "ce70cafb-d84c-42f7-b57e-d320ff768866") 
+          ? storeCoursesKey 
           : "a9a21b4b-47ee-4889-b709-9f101c59874d";
 
         const web3FormData = new FormData();

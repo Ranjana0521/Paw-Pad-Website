@@ -1825,6 +1825,17 @@
                   onChange: (e) => updateField("allowSubmissions", e.target.checked)
                 }),
                 React.createElement("label", { htmlFor: "allowSubmissionsCheck", style: { fontSize: "13px", color: "var(--admin-text)", cursor: "pointer" } }, "Accept New Candidate Applications Online")
+              ),
+              React.createElement(
+                "div",
+                { style: { gridColumn: "1 / -1", marginTop: "8px" } },
+                React.createElement("label", { style: { fontSize: "13px", color: "var(--admin-text-muted)" } }, "Course Applications & Enquiries Web3Forms Access Key"),
+                React.createElement("input", {
+                  className: "input-field",
+                  placeholder: "e.g. a9a21b4b-47ee-4889-b709-9f101c59874d",
+                  value: formData.web3FormsAccessKey || "",
+                  onChange: (e) => updateField("web3FormsAccessKey", e.target.value)
+                })
               )
             )
           ),

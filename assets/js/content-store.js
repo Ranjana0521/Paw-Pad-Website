@@ -823,13 +823,21 @@
             }
           }
 
-          if (parsed && parsed.myotherapy && (parsed.myotherapy.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || !parsed.myotherapy.web3FormsAccessKey)) {
-            parsed.myotherapy.web3FormsAccessKey = "ce70cafb-d84c-42f7-b57e-d320ff768866";
+          if (parsed && parsed.myotherapy) {
+            if (parsed.myotherapy.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || parsed.myotherapy.web3FormsAccessKey === "a9a21b4b-47ee-4889-b709-9f101c59874d" || !parsed.myotherapy.web3FormsAccessKey) {
+              parsed.myotherapy.web3FormsAccessKey = "ce70cafb-d84c-42f7-b57e-d320ff768866";
+            }
           }
-          if (parsed && parsed.courses && (parsed.courses.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || parsed.courses.web3FormsAccessKey === "ce70cafb-d84c-42f7-b57e-d320ff768866" || !parsed.courses.web3FormsAccessKey)) {
-            parsed.courses.web3FormsAccessKey = "a9a21b4b-47ee-4889-b709-9f101c59874d";
+          if (parsed && parsed.courses) {
+            if (parsed.courses.web3FormsAccessKey === "YOUR_ACCESS_KEY_HERE" || parsed.courses.web3FormsAccessKey === "ce70cafb-d84c-42f7-b57e-d320ff768866" || !parsed.courses.web3FormsAccessKey) {
+              parsed.courses.web3FormsAccessKey = "a9a21b4b-47ee-4889-b709-9f101c59874d";
+            }
           }
-          return this._deepMerge(JSON.parse(JSON.stringify(DEFAULT_CONTENT)), parsed);
+          const merged = this._deepMerge(JSON.parse(JSON.stringify(DEFAULT_CONTENT)), parsed);
+          try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(merged));
+          } catch (_) {}
+          return merged;
         }
       } catch (err) {
         console.warn("PawpadContentStore: could not load overrides from localStorage", err);

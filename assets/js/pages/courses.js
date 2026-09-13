@@ -515,12 +515,10 @@ function CourseCTA({ onBook }) {
   const emailTarget = cms.courseEnquiryEmail || "courses@pawpad.in";
   const defaultSubject = cms.courseEnquirySubject || "Course Enquiry - Pawpad Academy";
 
-  // Access key check: check courses settings first, fallback to myotherapy or default placeholder
-  const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
+  // Access key check: strictly use courses web3 access key
+  const accessKey = (cms.web3FormsAccessKey && cms.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE" && cms.web3FormsAccessKey !== "ce70cafb-d84c-42f7-b57e-d320ff768866")
     ? cms.web3FormsAccessKey
-    : ((window.PawpadContentStore && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey && window.PawpadContentStore.get("myotherapy")?.web3FormsAccessKey !== "YOUR_ACCESS_KEY_HERE")
-      ? window.PawpadContentStore.get("myotherapy").web3FormsAccessKey
-      : "a9a21b4b-47ee-4889-b709-9f101c59874d");
+    : "a9a21b4b-47ee-4889-b709-9f101c59874d";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
